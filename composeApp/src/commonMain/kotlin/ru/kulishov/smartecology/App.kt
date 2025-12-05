@@ -22,6 +22,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import ru.kulishov.smartecology.presentation.ui.elements.CameraBox
 import ru.kulishov.smartecology.presentation.ui.elements.InfoCard
+import ru.kulishov.smartecology.presentation.ui.elements.MagicBottomIsland
 import ru.kulishov.smartecology.presentation.ui.elements.SwitcherCustom
 import ru.kulishov.smartecology.presentation.ui.elements.TextFieldCustom
 import ru.kulishov.smartecology.presentation.ui.elements.TrashBox
@@ -53,11 +54,19 @@ fun App() {
 //            CameraBox(300,Color.Yellow,{
 //                Box(Modifier.fillMaxSize().background(Color.Red))
 //            })
-            var state by remember { mutableStateOf("") }
+            var state by remember { mutableStateOf(0) }
 //            Box(Modifier.width(500.dp)){
 //                TextFieldCustom(state,{state=it},false,Color.Yellow)
 //            }
-            TrashBox(true, Res.drawable.trash,"Бумага", Color.Blue)
+//
+            Column {
+                MagicBottomIsland(state,listOf(0,400,500),{it->},{TrashBox(true, Res.drawable.trash,"Бумага", Color.Blue)})
+                Button({state++}){
+
+                }
+            }
+
+
 
         }
     }

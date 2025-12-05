@@ -75,8 +75,7 @@ fun TrashBox(state: Boolean, icon: DrawableResource, text: String, color: Color)
                 )
             }
 
-//        Icon(painterResource(Res.drawable.trash_a), contentDescription = "", tint = color,
-//            modifier = Modifier.padding(start = offsetx.value))
+
             Box(
                 Modifier.padding(start = offsetx.value).width(100.dp).height(117.dp)
                     .background(color, shape = RoundedCornerShape(0, 0, 15, 15)),
