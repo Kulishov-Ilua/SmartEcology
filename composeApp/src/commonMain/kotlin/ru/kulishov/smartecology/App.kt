@@ -20,6 +20,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import ru.kulishov.smartecology.presentation.ui.camera.CameraView
 import ru.kulishov.smartecology.presentation.ui.elements.CameraBox
 import ru.kulishov.smartecology.presentation.ui.elements.InfoCard
 import ru.kulishov.smartecology.presentation.ui.elements.MagicBottomIsland
@@ -59,13 +60,13 @@ fun App() {
 //                TextFieldCustom(state,{state=it},false,Color.Yellow)
 //            }
 //
-            Column {
-                MagicBottomIsland(state,listOf(0,400,500),{it->},{TrashBox(true, Res.drawable.trash,"Бумага", Color.Blue)})
-                Button({state++}){
-
-                }
-            }
-
+//            Column {
+//                MagicBottomIsland(state,listOf(0,400,500),{it->},{TrashBox(true, Res.drawable.trash,"Бумага", Color.Blue)})
+//                Button({state++}){
+//
+//                }
+//            }
+            CameraView()
 
 
         }
