@@ -27,6 +27,8 @@ import ru.kulishov.smartecology.presentation.ui.elements.MagicBottomIsland
 import ru.kulishov.smartecology.presentation.ui.elements.SwitcherCustom
 import ru.kulishov.smartecology.presentation.ui.elements.TextFieldCustom
 import ru.kulishov.smartecology.presentation.ui.elements.TrashBox
+import ru.kulishov.smartecology.presentation.ui.mainscreen.MainScreenUI
+import ru.kulishov.smartecology.presentation.ui.mainscreen.MainScreenViewModel
 
 import smartecology.composeapp.generated.resources.Res
 import smartecology.composeapp.generated.resources.compose_multiplatform
@@ -35,40 +37,20 @@ import smartecology.composeapp.generated.resources.trash
 @Composable
 @Preview
 fun App() {
-    MaterialTheme {
         var showContent by remember { mutableStateOf(false) }
         Column(
             modifier = Modifier
-                .background(MaterialTheme.colorScheme.primaryContainer)
+                .background(MaterialTheme.colorScheme.surface)
                 .safeContentPadding()
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Box(Modifier.width(500.dp)){
-
-//                SwitcherCustom(listOf("1","dsfsdfs","adcfdsfds"),state,{state=it}, Color.Yellow,
-//                    TextStyle(), TextStyle())
-//                InfoCard("В России образуется 29,8 миллиона тонн органических отходов, но утилизируется лишь 11,4% из них.",
-//                    TextStyle())
-
-            }
-//            CameraBox(300,Color.Yellow,{
-//                Box(Modifier.fillMaxSize().background(Color.Red))
-//            })
-            var state by remember { mutableStateOf(0) }
-//            Box(Modifier.width(500.dp)){
-//                TextFieldCustom(state,{state=it},false,Color.Yellow)
-//            }
-//
-//            Column {
-//                MagicBottomIsland(state,listOf(0,400,500),{it->},{TrashBox(true, Res.drawable.trash,"Бумага", Color.Blue)})
-//                Button({state++}){
-//
-//                }
-//            }
-            CameraView()
-
+            val mainScreenViewModel= MainScreenViewModel()
+            MainScreenUI(true, mainScreenViewModel)
 
         }
-    }
 }
+
+
+
+

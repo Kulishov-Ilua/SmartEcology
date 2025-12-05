@@ -28,7 +28,7 @@ import smartecology.composeapp.generated.resources.info
 fun InfoCard(text: String) {
     Box(
         Modifier.fillMaxWidth().heightIn(min = 80.dp)
-            .background(Color(46, 46, 46), shape = RoundedCornerShape(10))
+            .background(MaterialTheme.colorScheme.background, shape = RoundedCornerShape(10))
     ){
         Box(Modifier.padding(top=5.dp, bottom = 15.dp, start = 10.dp, end = 10.dp)){
             Column(verticalArrangement = Arrangement.spacedBy(15.dp)) {
@@ -36,11 +36,11 @@ fun InfoCard(text: String) {
                     horizontalArrangement = Arrangement.spacedBy(5.dp)) {
                     Icon(
                         painter = painterResource(Res.drawable.info),
-                        tint = Color.White,
+                        tint = MaterialTheme.colorScheme.onBackground,
                         contentDescription = "info"
                     )
                     Text("Интересно", style = MaterialTheme.typography.bodyMedium.copy(
-                        color = MaterialTheme.colorScheme.primary,
+                        color = MaterialTheme.colorScheme.onBackground,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold
 
@@ -49,7 +49,7 @@ fun InfoCard(text: String) {
                 }
                 Box(Modifier.padding(start = 15.dp)){
                     Text(text, style = MaterialTheme.typography.bodyMedium.copy(
-                        color = MaterialTheme.colorScheme.primary,
+                        color = MaterialTheme.colorScheme.onBackground,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Medium
 

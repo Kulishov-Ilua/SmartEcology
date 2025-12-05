@@ -28,12 +28,12 @@ fun SwitcherCustom(
     val unactiveTextSyle = MaterialTheme.typography.bodyMedium.copy(color = Color(46, 46, 46))
     val activeTextStyle = MaterialTheme.typography.bodyMedium.copy(color = Color.Black)
     val boxColor = MaterialTheme.colorScheme.primary
-    Box(Modifier.fillMaxWidth()) {
+    Box() {
         LazyRow(verticalAlignment = Alignment.CenterVertically) {
             items(states) { item ->
                 Box(
                     Modifier.height(30.dp).background(
-                        if (state == item) boxColor else Color.Transparent,
+                        if (state == item) MaterialTheme.colorScheme.primary else Color.Transparent,
                         shape = RoundedCornerShape(5.dp)
                     )
                         .clickable {
