@@ -71,14 +71,14 @@ fun TrashBox(state: Boolean, icon: DrawableResource, text: String, color: Color)
             Box() {
                 Icon(
                     painterResource(Res.drawable.trash_b), contentDescription = "",
-                    Modifier.padding(bottom = offsetY.value).rotate(rotate.value), tint = color
+                    Modifier.padding(bottom = offsetY.value).rotate(rotate.value), tint = if(nstate) color else Color.Gray
                 )
             }
 
 
             Box(
                 Modifier.padding(start = offsetx.value).width(100.dp).height(117.dp)
-                    .background(color, shape = RoundedCornerShape(0, 0, 15, 15)),
+                    .background(if(nstate) color else Color.Gray, shape = RoundedCornerShape(0, 0, 15, 15)),
                 contentAlignment = Alignment.Center
             ){
                 Column(horizontalAlignment = Alignment.CenterHorizontally,) {

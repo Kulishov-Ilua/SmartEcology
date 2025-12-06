@@ -9,28 +9,42 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.painterResource
 import ru.kulishov.smartecology.presentation.ui.camera.CameraBlock
 import ru.kulishov.smartecology.presentation.ui.camera.CameraView
 import ru.kulishov.smartecology.presentation.ui.elements.ButtonCustom
 import ru.kulishov.smartecology.presentation.ui.elements.CameraBox
+import ru.kulishov.smartecology.presentation.ui.elements.MagicBottomIsland
 import ru.kulishov.smartecology.presentation.ui.elements.SwitcherCustom
 import ru.kulishov.smartecology.presentation.ui.elements.TextFieldCustom
+import ru.kulishov.smartecology.presentation.ui.elements.TrashBox
 import ru.kulishov.smartecology.presentation.ui.elements.chatbot.ChatBotUI
 import ru.kulishov.smartecology.presentation.ui.elements.chatbot.ChatBotViewModel
 import ru.kulishov.smartecology.presentation.ui.elements.factlist.FactListUI
 import ru.kulishov.smartecology.presentation.ui.elements.factlist.FactListViewModel
+import ru.kulishov.smartecology.presentation.ui.elements.quize.QuizeUI
+import ru.kulishov.smartecology.presentation.ui.elements.quize.QuizeViewModel
 import smartecology.composeapp.generated.resources.Res
 import smartecology.composeapp.generated.resources.manual
 import smartecology.composeapp.generated.resources.menu
+import smartecology.composeapp.generated.resources.plastic
 
 @Composable
 fun MainScreenUI(
@@ -44,21 +58,25 @@ fun MainScreenUI(
     val inputState = viewModel.inputState.collectAsState()
     val activities = viewModel.activities.collectAsState()
     val textFieldViewModel= ChatBotViewModel()
+    var shot by remember { mutableStateOf(false) }
+    val quizeViewModel= QuizeViewModel()
 
-    Box(Modifier.fillMaxSize()) {
+    Box(Modifier.padding(top = 25.dp).fillMaxSize()) {
         when(uiState.value){
             is MainScreenViewModel.UiState.Error -> {
 
             }
             MainScreenViewModel.UiState.Loading -> {
-
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                }
             }
             MainScreenViewModel.UiState.Success -> {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.padding(start = 20.dp, end = 20.dp)
+                   // modifier = Modifier.padding(start = 20.dp, end = 20.dp)
                 ) {
-                    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.TopEnd) {
+                    Box(Modifier.padding(start = 20.dp, end = 20.dp).fillMaxWidth(), contentAlignment = Alignment.TopEnd) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(15.dp)
@@ -88,7 +106,8 @@ fun MainScreenUI(
                             true -> {
                                 Row(
                                     verticalAlignment = Alignment.Top,
-                                    horizontalArrangement = Arrangement.spacedBy(20.dp)
+                                    horizontalArrangement = Arrangement.spacedBy(20.dp),
+                                    modifier = Modifier.padding(start = 20.dp, end = 20.dp)
                                 ) {
 
                                         Box(
@@ -101,12 +120,25 @@ fun MainScreenUI(
                                                 verticalArrangement = Arrangement.spacedBy(50.dp)
                                             ) {
                                                 SwitcherCustom(
-                                                    listOf("Картинка", "Текст"),
-                                                    if (inputState.value) "Картинка" else "Текст",
-                                                    { viewModel.setInputState(if (it == "Картинка") true else false) })
-                                                if(inputState.value){
-                                                    CameraBox(400, { CameraBlock() })
-                                                }else{
+                                                    listOf("Картинка", "Текст", "Квиз"),
+                                                    if (inputState.value==0) "Картинка" else if (inputState.value==1)"Текст" else "Квиз",
+                                                    { it-> viewModel.setInputState(
+                                                        when(it){
+                                                            "Картинка" ->{
+                                                                0
+                                                            }
+                                                            "Текст" -> {
+                                                                1
+                                                            }
+                                                            else ->{
+                                                                2
+                                                            }
+                                                        } )})
+                                                if(inputState.value==0){
+                                                    CameraBox(400, { CameraBlock({viewModel.imagePrompt(it)
+                                                                                 shot=false
+                                                                                 },shot) })
+                                                }else if(inputState.value==1){
 
                                                     Box(){
                                                         Column(horizontalAlignment = Alignment.CenterHorizontally,
@@ -118,16 +150,22 @@ fun MainScreenUI(
 
                                                         }
                                                     }
+                                                }else{
+                                                    Box(modifier = Modifier.padding(start = 20.dp,end=20.dp)){
+                                                        QuizeUI(quizeViewModel,{viewModel.modelAnswer=it
+                                                            viewModel.setState(MainScreenViewModel.UiState.Result)})
+                                                    }
+
                                                 }
 
 
                                                 ButtonCustom({
-                                                    if(inputState.value){
-
+                                                    if(inputState.value==0){
+                                                        shot=true
                                                     }else{
                                                         viewModel.textRequest(textFieldViewModel.input.value)
                                                     }
-                                                }, text = "Как быть с мусором")
+                                                }, text = "Как быть с мусором", colors = ButtonDefaults.buttonColors().copy(contentColor = MaterialTheme.colorScheme.onSurface))
                                             }
                                         }
                                         Box(
@@ -175,8 +213,80 @@ fun MainScreenUI(
             }
 
             MainScreenViewModel.UiState.Accept -> {
+                textFieldViewModel.setInput(viewModel.modelAnswer)
+                textFieldViewModel.setReadOnly(true)
+                Box(Modifier.padding(start = 20.dp, end = 20.dp).fillMaxSize(), contentAlignment = Alignment.Center){
+                    Column(horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(50.dp)) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(50.dp)) {
+                            Text("Мои предположения", style = MaterialTheme.typography.titleLarge)
+                            Box(modifier = Modifier.fillMaxWidth()){
+                                ChatBotUI(textFieldViewModel,"Мои предположения")
+                            }
+                            Row(horizontalArrangement = Arrangement.spacedBy(15.dp)) {
+                                ButtonCustom({
+                                    textFieldViewModel.setReadOnly(false)
+                                    viewModel.setInputState(1)
+                                    viewModel.setState(MainScreenViewModel.UiState.Success)
+                                }, text = "Не верно",
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.onSurface,
+                                        contentColor = MaterialTheme.colorScheme.onSurface,
+                                        disabledContentColor = Color.Gray
+                                    ))
+
+                                ButtonCustom({
+                                    viewModel.textRequest(textFieldViewModel.input.value)
+                                }, text = "Верно",colors = ButtonDefaults.buttonColors().copy(contentColor = MaterialTheme.colorScheme.onSurface))
+                            }
+
+                        }
+                    }
+                }
+
             }
             MainScreenViewModel.UiState.Result -> {
+                textFieldViewModel.setInput(viewModel.modelAnswer)
+                textFieldViewModel.setReadOnly(true)
+                LazyColumn {
+                    item{
+                        Box(Modifier.padding(start = 20.dp, end = 20.dp, bottom = 300.dp).fillMaxSize(), contentAlignment = Alignment.TopCenter){
+                            Column(horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(50.dp)) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(50.dp)) {
+                                    Text("Мои рекомендации", style = MaterialTheme.typography.titleLarge)
+                                    Box(modifier = Modifier.fillMaxWidth()){
+                                        ChatBotUI(textFieldViewModel,"Мои рекомендации")
+                                    }
+                                    Row(horizontalArrangement = Arrangement.spacedBy(15.dp)) {
+                                        ButtonCustom({
+                                            textFieldViewModel.setReadOnly(false)
+                                            viewModel.setState(MainScreenViewModel.UiState.Success)
+                                        }, text = "Спасибо",colors = ButtonDefaults.buttonColors().copy(contentColor = MaterialTheme.colorScheme.onSurface))
+                                    }
+
+
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter){
+                    MagicBottomIsland(1,listOf(0,300), onChange = {},{
+                        Row(horizontalArrangement = Arrangement.spacedBy(50.dp)) {
+                            TrashBox(state = if (viewModel.modelAnswer.contains("пластик")||viewModel.modelAnswer.contains("Пластик")||viewModel.modelAnswer.contains("**пластик**")) true else false,Res.drawable.plastic,"Пластик",Color.Yellow)
+                            TrashBox(state = if (viewModel.modelAnswer.contains("стекло")||viewModel.modelAnswer.contains("Стекло")||viewModel.modelAnswer.contains("**стекло**")) true else false,Res.drawable.plastic,"Стекло",Color(21,0,255))
+                            TrashBox(state = if (viewModel.modelAnswer.contains("буиага")||viewModel.modelAnswer.contains("Бумага")||viewModel.modelAnswer.contains("**бумага**")) true else false,Res.drawable.plastic,"Бумага",Color(8,154,0))
+                            TrashBox(state = if (viewModel.modelAnswer.contains("другое")||viewModel.modelAnswer.contains("Другое")||viewModel.modelAnswer.contains("**другое**")) true else false,Res.drawable.plastic,"Другое",Color(204,81,39))
+
+
+                        }
+                    })
+                }
+
 
             }
         }

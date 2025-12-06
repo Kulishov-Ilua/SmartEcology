@@ -23,7 +23,7 @@ fun ButtonCustom(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    shape: Shape = RoundedCornerShape(5),
+    shape: Shape = RoundedCornerShape(10),
     colors: ButtonColors = ButtonDefaults.buttonColors(
         containerColor = Color(255, 222, 0)
     ),
@@ -44,6 +44,8 @@ fun ButtonCustom(
         contentPadding,
         interactionSource
     ) {
-        Text(text, style = MaterialTheme.typography.bodyMedium)
+        Text(text, style = MaterialTheme.typography.bodyMedium.copy(
+            color = colors.contentColor
+        ))
     }
 }

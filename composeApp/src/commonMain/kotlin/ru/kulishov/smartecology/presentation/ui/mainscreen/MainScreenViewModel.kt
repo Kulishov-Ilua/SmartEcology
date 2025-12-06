@@ -2,6 +2,7 @@ package ru.kulishov.smartecology.presentation.ui.mainscreen
 
 
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.ViewModel
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.HttpTimeout
@@ -19,19 +20,31 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.json.Json
 import ru.kulishov.smartecology.data.SystemPrompt
+import ru.kulishov.smartecology.data.SystemPrompt2
+import ru.kulishov.smartecology.data.imagePromptText
 import ru.kulishov.smartecology.data.remote.model.ChatCompletionResponse
 import ru.kulishov.smartecology.presentation.ui.camera.BaseViewModel
 
 class MainScreenViewModel() : BaseViewModel() {
-    val client = HttpClient(CIO)
+    val client = HttpClient(CIO) {
+        install(ContentNegotiation) {
+            json(Json {
+                prettyPrint = true
+                isLenient = true
+                ignoreUnknownKeys = true
+            })
+        }
+
+
+    }
     private val _uiState = MutableStateFlow<UiState>(UiState.Success)
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
     private val _infoState = MutableStateFlow<String>("Факты")
     val infoState: StateFlow<String> = _infoState.asStateFlow()
 
-    private val _inputState = MutableStateFlow<Boolean>(true)
-    val inputState: StateFlow<Boolean> = _inputState.asStateFlow()
+    private val _inputState = MutableStateFlow<Int>(0)
+    val inputState: StateFlow<Int> = _inputState.asStateFlow()
 
     private val _orientation = MutableStateFlow<Boolean>(true)
     val orientation: StateFlow<Boolean> = _orientation.asStateFlow()
@@ -42,8 +55,10 @@ class MainScreenViewModel() : BaseViewModel() {
     private val _activitiesMap = MutableStateFlow<Map<String, String>>(mapOf())
     val activitiesMap: StateFlow<Map<String, String>> = _activitiesMap.asStateFlow()
 
+    var modelAnswer =""
 
-    fun setInputState(state: Boolean) {
+
+    fun setInputState(state: Int) {
         launch {
             _inputState.value = state
         }
@@ -60,39 +75,44 @@ class MainScreenViewModel() : BaseViewModel() {
         _infoState.value = state
     }
 
-    fun textRequest(text: String){
-
+    fun setState(state: UiState){
+        _uiState.value=state
+    }
+    fun imagePrompt(base64Image: String){
         launch {
+            println("photo")
             _uiState.value = UiState.Loading
 
             try {
 
-                val client = HttpClient(CIO) {
-                    install(ContentNegotiation) {
-                        json(Json {
-                            prettyPrint = true
-                            isLenient = true
-                            ignoreUnknownKeys = true
-                        })
-                    }
-
-
-                }
                 val jsonBody = """
-        {
-            "model": "ai/gemma3",
-            "messages": [
                 {
-                    "role": "system",
-                    "content": "$SystemPrompt"
-                },
-                {
-                    "role": "user",
-                    "content": "$text"
+                    "model": "ai/gemma3",
+                    "messages": [
+                        {
+                            "role": "system",
+                            "content": "$imagePromptText"
+                        },
+                        {
+                            "role": "user",
+                            "content": [
+                                {
+                                    "type": "text",
+                                    "text": "Это пытаются выбросить. Определи что на фотографии и скажи, в какие контейнеры"
+                                },
+                                {
+                                    "type": "image_url",
+                                    "image_url": {
+                                        "url": "data:image/jpeg;base64,$base64Image"
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    "max_tokens": 500,
+                    "temperature": 0.1
                 }
-            ]
-        }
-        """.trimIndent()
+                """.trimIndent()
 
                 val response: HttpResponse =
                     client.post("http://10.0.2.2:12434/engines/llama.cpp/v1/chat/completions") {
@@ -114,10 +134,72 @@ class MainScreenViewModel() : BaseViewModel() {
 
                 println("Status: ${parsedResponse.id}")
                 println("Response: ${parsedResponse.choices[0].message}")
+                modelAnswer=parsedResponse.choices[0].message.content
+                _uiState.value= UiState.Accept
             }catch (e: Exception){
                 println(e)
             }
-            _uiState.value= UiState.Success
+
+
+        }
+    }
+    fun escapeForJson(input: String): String {
+        return input
+            .replace("\\", "\\\\")  // обратный слеш
+            .replace("\"", "\\\"")  // кавычки
+            .replace("\n", "\\n")   // перенос строки
+            .replace("\r", "\\r")   // возврат каретки
+            .replace("\t", "\\t")   // табуляция
+    }
+
+
+    fun textRequest(text: String){
+
+        launch {
+            _uiState.value = UiState.Loading
+
+            try {
+                val jsonBody = """
+            {
+                "model": "ai/gemma3",
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": "${escapeForJson(SystemPrompt)}"
+                    },
+                    {
+                        "role": "user",
+                        "content": "${escapeForJson(text)}"
+                    }
+                ]
+            }
+            """.trimIndent()
+
+                val response: HttpResponse =
+                    client.post("http://10.0.2.2:12434/engines/llama.cpp/v1/chat/completions") {
+                        contentType(ContentType.Application.Json)
+                        setBody(jsonBody)
+                        timeout {
+                            requestTimeoutMillis = 120000L
+                            connectTimeoutMillis = 30000L
+                            socketTimeoutMillis = 240000L
+                        }
+                    }
+
+
+                val responseText = response.bodyAsText()
+                println("Сырой ответ: $responseText")
+
+                val parsedResponse = Json { ignoreUnknownKeys = true }
+                    .decodeFromString<ChatCompletionResponse>(responseText)
+
+                println("Status: ${parsedResponse.id}")
+                println("Response: ${parsedResponse.choices[0].message}")
+                modelAnswer=parsedResponse.choices[0].message.content
+                _uiState.value= UiState.Result
+            }catch (e: Exception){
+                println(e)
+            }
 
         }
     }
@@ -130,3 +212,4 @@ class MainScreenViewModel() : BaseViewModel() {
         data class Error(val message: String) : UiState()
     }
 }
+
