@@ -209,6 +209,7 @@ class MainScreenViewModel() : BaseViewModel() {
         object Result: UiState()
         object Loading : UiState()
         object Success : UiState()
+        object WebView: UiState()
         data class Error(val message: String) : UiState()
     }
 }

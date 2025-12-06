@@ -6,8 +6,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ButtonColors
@@ -35,6 +37,7 @@ import ru.kulishov.smartecology.presentation.ui.elements.MagicBottomIsland
 import ru.kulishov.smartecology.presentation.ui.elements.SwitcherCustom
 import ru.kulishov.smartecology.presentation.ui.elements.TextFieldCustom
 import ru.kulishov.smartecology.presentation.ui.elements.TrashBox
+import ru.kulishov.smartecology.presentation.ui.elements.WebPreview
 import ru.kulishov.smartecology.presentation.ui.elements.chatbot.ChatBotUI
 import ru.kulishov.smartecology.presentation.ui.elements.chatbot.ChatBotViewModel
 import ru.kulishov.smartecology.presentation.ui.elements.factlist.FactListUI
@@ -42,6 +45,7 @@ import ru.kulishov.smartecology.presentation.ui.elements.factlist.FactListViewMo
 import ru.kulishov.smartecology.presentation.ui.elements.quize.QuizeUI
 import ru.kulishov.smartecology.presentation.ui.elements.quize.QuizeViewModel
 import smartecology.composeapp.generated.resources.Res
+import smartecology.composeapp.generated.resources.exit
 import smartecology.composeapp.generated.resources.manual
 import smartecology.composeapp.generated.resources.menu
 import smartecology.composeapp.generated.resources.plastic
@@ -60,6 +64,7 @@ fun MainScreenUI(
     val textFieldViewModel= ChatBotViewModel()
     var shot by remember { mutableStateOf(false) }
     val quizeViewModel= QuizeViewModel()
+    val currentAdress by remember { mutableStateOf("https://docs.google.com/presentation/d/1I2EqD1QuewortwVOdxqe-B00m-MiP6pFJn21GD0_iBc/mobilepresent?slide=id.gc6f972163_0_19") }
 
     Box(Modifier.padding(top = 25.dp).fillMaxSize()) {
         when(uiState.value){
@@ -86,7 +91,7 @@ fun MainScreenUI(
                                 contentDescription = "Manual",
                                 tint = MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier.clickable {
-
+                                    viewModel.setState(MainScreenViewModel.UiState.WebView)
                                 })
                             Icon(
                                 painter = painterResource(Res.drawable.menu),
@@ -287,6 +292,22 @@ fun MainScreenUI(
                     })
                 }
 
+
+            }
+
+            MainScreenViewModel.UiState.WebView -> {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter){
+                    Box(Modifier.fillMaxWidth().fillMaxHeight()){
+                        Column {
+                            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd){
+                                Icon(painter = painterResource(Res.drawable.exit), contentDescription = "exit", tint = MaterialTheme.colorScheme.onSurface,
+                                    modifier = Modifier.clickable{viewModel.setState(
+                                        MainScreenViewModel.UiState.Success)})
+                            }
+                            WebPreview(currentAdress)
+                        }
+                    }
+                }
 
             }
         }
