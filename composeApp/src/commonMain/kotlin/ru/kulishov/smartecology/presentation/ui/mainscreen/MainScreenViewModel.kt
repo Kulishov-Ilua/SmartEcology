@@ -91,14 +91,14 @@ class MainScreenViewModel() : BaseViewModel() {
                     "messages": [
                         {
                             "role": "system",
-                            "content": "$imagePromptText"
+                            "content": "Ты агент помощник"
                         },
                         {
                             "role": "user",
                             "content": [
                                 {
                                     "type": "text",
-                                    "text": "Это пытаются выбросить. Определи что на фотографии и скажи, в какие контейнеры"
+                                    "text": "Что находится на фотогрфии"
                                 },
                                 {
                                     "type": "image_url",

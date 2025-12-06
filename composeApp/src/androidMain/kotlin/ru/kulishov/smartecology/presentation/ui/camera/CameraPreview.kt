@@ -76,7 +76,7 @@ fun CameraPreview(shot: Boolean, onSaved:(String)-> Unit){
                         imageCapture = capture
 
                         val cameraSelector = CameraSelector.Builder()
-                            .requireLensFacing(CameraSelector.LENS_FACING_BACK)
+                            .requireLensFacing(CameraSelector.LENS_FACING_FRONT)
                             .build()
 
 

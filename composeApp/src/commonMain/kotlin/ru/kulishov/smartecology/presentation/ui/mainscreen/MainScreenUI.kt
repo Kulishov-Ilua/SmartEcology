@@ -302,7 +302,8 @@ fun MainScreenUI(
                             Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd){
                                 Icon(painter = painterResource(Res.drawable.exit), contentDescription = "exit", tint = MaterialTheme.colorScheme.onSurface,
                                     modifier = Modifier.clickable{viewModel.setState(
-                                        MainScreenViewModel.UiState.Success)})
+                                        MainScreenViewModel.UiState.Success
+                                    )})
                             }
                             WebPreview(currentAdress)
                         }
