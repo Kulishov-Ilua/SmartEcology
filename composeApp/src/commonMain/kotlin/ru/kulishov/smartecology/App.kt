@@ -26,6 +26,7 @@ import ru.kulishov.smartecology.data.local.repository.PersonRepositoryImpl
 import ru.kulishov.smartecology.data.local.repository.SettingRepositoryImpl
 import ru.kulishov.smartecology.domain.repository.SettingRepository
 import ru.kulishov.smartecology.domain.usecase.person.AddPersonUseCase
+import ru.kulishov.smartecology.domain.usecase.person.GetPersonUseCase
 import ru.kulishov.smartecology.domain.usecase.settings.GetSettingsUseCase
 import ru.kulishov.smartecology.domain.usecase.settings.InsertSettingUseCase
 import ru.kulishov.smartecology.domain.usecase.settings.SetSettingsUseCase
@@ -53,7 +54,8 @@ fun App(db: AppDatabase) {
         val mainScreenViewModel= MainScreenViewModel(
             GetSettingsUseCase(settingRepository),
             InsertSettingUseCase(settingRepository), SetSettingsUseCase(settingRepository),
-            AddPersonUseCase(personRepository))
+            AddPersonUseCase(personRepository),
+            GetPersonUseCase(personRepository))
         Column(
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.surface)

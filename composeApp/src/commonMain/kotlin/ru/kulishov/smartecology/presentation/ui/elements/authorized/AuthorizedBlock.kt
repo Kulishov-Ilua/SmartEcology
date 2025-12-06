@@ -1,6 +1,7 @@
 package ru.kulishov.smartecology.presentation.ui.elements.authorized
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -28,6 +31,7 @@ fun AuthorizedBlock(viewModel: AuthorizedBlockViewModel){
     val isError = viewModel.isError.collectAsState()
     val secondPassword = viewModel.secondPassword.collectAsState()
     val name = viewModel.name.collectAsState()
+    val users = viewModel.users.collectAsState()
 
     Box(modifier = Modifier.background(MaterialTheme.colorScheme.background, shape = RoundedCornerShape(20.dp)).width(300.dp), contentAlignment = Alignment.Center){
         Column(modifier = Modifier.padding(25.dp).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally,
@@ -83,11 +87,32 @@ fun AuthorizedBlock(viewModel: AuthorizedBlockViewModel){
 
                     }
                      ButtonCustom({
-                        viewModel.checkPassword()
-                    }, text = "Войти")
+                        viewModel.checkUser()
+                         viewModel.setState(AuthorizedBlockViewModel.UiState.UserList)
+                    }, text = "Зарегистрироваться")
                 }
 
                 is AuthorizedBlockViewModel.UiState.Error -> {
+                }
+
+                AuthorizedBlockViewModel.UiState.UserList -> {
+                    Box(Modifier.padding(20.dp).height(400.dp).fillMaxSize(), contentAlignment = Alignment.Center){
+                        LazyColumn {
+                            item {
+                                ButtonCustom({
+                                    viewModel.setState(AuthorizedBlockViewModel.UiState.UserEmpty)
+                                }, text = "Познакомимся?")
+                            }
+                            items(users.value){user->
+                                Box(Modifier.clickable{
+                                    viewModel.onCheckUser(user)
+                                }.fillMaxWidth().height(70.dp), contentAlignment = Alignment.Center){
+                                    Text(user.name, style = MaterialTheme.typography.bodyMedium)
+                                }
+
+                            }
+                        }
+                    }
                 }
             }
         }

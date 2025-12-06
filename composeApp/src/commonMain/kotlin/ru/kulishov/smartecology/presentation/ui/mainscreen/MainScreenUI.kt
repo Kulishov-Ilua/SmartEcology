@@ -39,6 +39,8 @@ import ru.kulishov.smartecology.presentation.ui.elements.SwitcherCustom
 import ru.kulishov.smartecology.presentation.ui.elements.TextFieldCustom
 import ru.kulishov.smartecology.presentation.ui.elements.TrashBox
 import ru.kulishov.smartecology.presentation.ui.elements.WebPreview
+import ru.kulishov.smartecology.presentation.ui.elements.authorized.AuthorizedBlock
+import ru.kulishov.smartecology.presentation.ui.elements.authorized.AuthorizedBlockViewModel
 import ru.kulishov.smartecology.presentation.ui.elements.chatbot.ChatBotUI
 import ru.kulishov.smartecology.presentation.ui.elements.chatbot.ChatBotViewModel
 import ru.kulishov.smartecology.presentation.ui.elements.factlist.FactListUI
@@ -61,6 +63,8 @@ fun MainScreenUI(
     viewModel.setOrientation(orientation)
     val orientation = viewModel.orientation.collectAsState()
     val uiState = viewModel.uiState.collectAsState()
+
+    val personListState = viewModel.personListState.collectAsState()
 
     val textFieldViewModel= ChatBotViewModel()
 
@@ -86,6 +90,12 @@ fun MainScreenUI(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(15.dp)
                         ) {
+                            ButtonCustom(
+                                onClick = {
+                                    viewModel.setPersonListState()
+                                }, text = if(viewModel.currentUser.value.id!=-1) viewModel.currentUser.value.name
+                                else "Войти"
+                            )
                             Icon(
                                 painter = painterResource(Res.drawable.manual),
                                 contentDescription = "Manual",
@@ -133,6 +143,12 @@ fun MainScreenUI(
 
                 }
 
+                if(personListState.value){
+                    Box(Modifier.padding(end = 20.dp).fillMaxSize(), contentAlignment = Alignment.TopEnd){
+                        viewModel.usersViewModel.setState(AuthorizedBlockViewModel.UiState.UserList)
+                        AuthorizedBlock(viewModel.usersViewModel)
+                    }
+                }
 
             }
 

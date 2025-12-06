@@ -15,11 +15,11 @@ interface PersonDao {
     fun  getPersons(): Flow<List<PersonEntity>>
 
     @Insert
-    fun addPerson(person: PersonEntity)
+    suspend fun addPerson(person: PersonEntity)
 
     @Delete
-    fun deletePerson(person: PersonEntity)
+   suspend fun deletePerson(person: PersonEntity)
 
     @Update
-    fun updatePerson(person: PersonEntity)
+    suspend fun updatePerson(person: PersonEntity)
 }

@@ -30,12 +30,14 @@ import ru.kulishov.smartecology.domain.model.Setting
 import ru.kulishov.smartecology.domain.model.StartQuize
 import ru.kulishov.smartecology.domain.model.TrashBox
 import ru.kulishov.smartecology.domain.usecase.person.AddPersonUseCase
+import ru.kulishov.smartecology.domain.usecase.person.GetPersonUseCase
 import ru.kulishov.smartecology.domain.usecase.settings.GetSettingsUseCase
 import ru.kulishov.smartecology.domain.usecase.settings.InsertSettingUseCase
 import ru.kulishov.smartecology.domain.usecase.settings.SetSettingsUseCase
 import ru.kulishov.smartecology.presentation.ui.adminpanel.AdminPanel
 import ru.kulishov.smartecology.presentation.ui.adminpanel.AdminPanelViewModel
 import ru.kulishov.smartecology.presentation.ui.camera.BaseViewModel
+import ru.kulishov.smartecology.presentation.ui.elements.authorized.AuthorizedBlockViewModel
 import ru.kulishov.smartecology.presentation.ui.mainscreenblocs.contentblock.ContentBlockViewModel
 import ru.kulishov.smartecology.presentation.ui.mainscreenblocs.inputblock.InputBlockViewModel
 
@@ -43,7 +45,8 @@ class MainScreenViewModel(
     private val getSettingsUseCase: GetSettingsUseCase,
     private val insertSettingsUseCase: InsertSettingUseCase,
     private val setSettingsUseCase: SetSettingsUseCase,
-    private val addPersonUseCase: AddPersonUseCase
+    private val addPersonUseCase: AddPersonUseCase,
+    private val getPersonUseCase: GetPersonUseCase
 ) : BaseViewModel() {
     val client = HttpClient(CIO) {
         install(ContentNegotiation) {
@@ -66,9 +69,12 @@ class MainScreenViewModel(
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
 
+    private val _personListState = MutableStateFlow<Boolean>(false)
+    val personListState: StateFlow<Boolean> = _personListState.asStateFlow()
 
-
-
+    fun setPersonListState(){
+        _personListState.value=!personListState.value
+    }
 
     private val _staticticState = MutableStateFlow<Boolean>(false)
     val staticticState: StateFlow<Boolean> = _staticticState.asStateFlow()
@@ -83,17 +89,42 @@ class MainScreenViewModel(
     private val _boxes = MutableStateFlow<List<TrashBox>>(emptyList())
     val boxes: StateFlow<List<TrashBox>> = _boxes.asStateFlow()
 
+    private val _currentUser = MutableStateFlow<Person>(Person(-1,",",0,"",0,""))
+    val currentUser: StateFlow<Person> = _currentUser.asStateFlow()
+
+    private val _users = MutableStateFlow<List<Person>>(emptyList())
+    val users: StateFlow<List<Person>> = _users.asStateFlow()
 
 
 
+    val usersViewModel = AuthorizedBlockViewModel("",{},{},{},
+        {
+            _currentUser.value=it
+            _personListState.value=false
+        },{
+            addUser(it)
+        })
 
+    fun addUser(person: Person){
+        launch {
+            addPersonUseCase(person)
+            getPersonUseCase().catch { e ->
+                _uiState.emit(UiState.Error(e.message ?: "Unknow error"))
+            }.collect { set ->
+                _users.value=set
+                usersViewModel.setUsers(set)
+                usersViewModel.setState(AuthorizedBlockViewModel.UiState.UserList)
+            }
+            _personListState.value=false
+        }
+    }
     private val _orientation = MutableStateFlow<Boolean>(true)
     val orientation: StateFlow<Boolean> = _orientation.asStateFlow()
 
     var adminPanelViewModel = AdminPanelViewModel({
         authAdmin(it)
     }, {
-        authUser(it)
+        addUser(it)
     })
     var modelAnswer =""
 
@@ -108,6 +139,7 @@ class MainScreenViewModel(
             modelAnswer=it
             _uiState.value= UiState.Result
         })
+
     val contentBlockViewModel = ContentBlockViewModel()
 
 
@@ -147,7 +179,19 @@ class MainScreenViewModel(
 
                 println(settings.value)
             }
+
+
             //_uiState.value= UiState.Success
+        }
+        launch {
+            getPersonUseCase().catch { e ->
+                _uiState.emit(UiState.Error(e.message ?: "Unknow error"))
+            }.collect { set ->
+                _users.value=set
+                usersViewModel.setUsers(users.value)
+
+                usersViewModel.setState(AuthorizedBlockViewModel.UiState.UserList)
+            }
         }
 
     }
@@ -161,9 +205,11 @@ class MainScreenViewModel(
         }
     }
 
-    fun authUser(name: String){
+    fun addUser(name: String){
         launch {
+            println("ddd")
             addPersonUseCase(Person(0,name,0,"",0,""))
+            _personListState.value=false
         }
     }
     fun setOrientation(state: Boolean) {

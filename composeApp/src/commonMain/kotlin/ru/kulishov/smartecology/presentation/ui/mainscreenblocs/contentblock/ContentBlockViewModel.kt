@@ -17,6 +17,9 @@ class ContentBlockViewModel(
 
     private val _infoState = MutableStateFlow<String>("Факты")
     val infoState: StateFlow<String> = _infoState.asStateFlow()
+
+    private val _facts = MutableStateFlow<List<String>>(emptyList())
+    val facts: StateFlow<List<String>> = _facts.asStateFlow()
     private val _factAccept = MutableStateFlow<Boolean>(false)
     val factAccept: StateFlow<Boolean> = _factAccept.asStateFlow()
 
