@@ -68,6 +68,11 @@ fun AppTheme(content: @Composable () -> Unit) {
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onBackground
+            ),
+            titleLarge = TextStyle(
+                fontSize = 32.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
             )
         ),
         content = content,

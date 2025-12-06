@@ -24,12 +24,13 @@ fun TextFieldCustom(
     text: String,
     onTextChange: (String) -> Unit,
     readOnly: Boolean,
+    placeholder: String
 ) {
     OutlinedTextField(
         value = text,
         onValueChange = { onTextChange(it) },
         readOnly = readOnly,
-        placeholder = { Text("hrllo") },
+        placeholder = { Text(placeholder, style = MaterialTheme.typography.bodyMedium) },
         leadingIcon = {
             Icon(
                 painter = painterResource(Res.drawable.trash),

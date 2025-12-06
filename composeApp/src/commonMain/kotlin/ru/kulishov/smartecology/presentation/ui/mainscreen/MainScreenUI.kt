@@ -23,6 +23,9 @@ import ru.kulishov.smartecology.presentation.ui.camera.CameraView
 import ru.kulishov.smartecology.presentation.ui.elements.ButtonCustom
 import ru.kulishov.smartecology.presentation.ui.elements.CameraBox
 import ru.kulishov.smartecology.presentation.ui.elements.SwitcherCustom
+import ru.kulishov.smartecology.presentation.ui.elements.TextFieldCustom
+import ru.kulishov.smartecology.presentation.ui.elements.chatbot.ChatBotUI
+import ru.kulishov.smartecology.presentation.ui.elements.chatbot.ChatBotViewModel
 import ru.kulishov.smartecology.presentation.ui.elements.factlist.FactListUI
 import ru.kulishov.smartecology.presentation.ui.elements.factlist.FactListViewModel
 import smartecology.composeapp.generated.resources.Res
@@ -42,103 +45,129 @@ fun MainScreenUI(
     val activities = viewModel.activities.collectAsState()
 
     Box(Modifier.fillMaxSize()) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(start = 20.dp, end = 20.dp)
-        ) {
-            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.TopEnd) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(15.dp)
-                ) {
-                    Icon(
-                        painter = painterResource(Res.drawable.manual),
-                        contentDescription = "Manual",
-                        tint = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.clickable {
+        when(uiState.value){
+            is MainScreenViewModel.UiState.Error -> {
 
-                        })
-                    Icon(
-                        painter = painterResource(Res.drawable.menu),
-                        contentDescription = "Menu",
-                        tint = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.clickable {
-
-                        })
-
-                }
             }
-            Box(
-                Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                when (orientation.value) {
-                    true -> {
+            MainScreenViewModel.UiState.Loading -> {
+
+            }
+            MainScreenViewModel.UiState.Success -> {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(start = 20.dp, end = 20.dp)
+                ) {
+                    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.TopEnd) {
                         Row(
-                            verticalAlignment = Alignment.Top,
-                            horizontalArrangement = Arrangement.spacedBy(20.dp)
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(15.dp)
                         ) {
-                            if(inputState.value){
-                                Box(
-                                    modifier = Modifier.fillMaxWidth(0.5f),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Column(
-                                        modifier = Modifier.fillMaxSize(),
-                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                        verticalArrangement = Arrangement.spacedBy(50.dp)
-                                    ) {
-                                        SwitcherCustom(
-                                            listOf("Картинка", "Текст"),
-                                            if (inputState.value) "Картинка" else "Текст",
-                                            { viewModel.setInputState(if (it == "Картинка") true else false) })
-                                        CameraBox(400, { CameraBlock() })
-                                        ButtonCustom({
+                            Icon(
+                                painter = painterResource(Res.drawable.manual),
+                                contentDescription = "Manual",
+                                tint = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.clickable {
 
-                                        }, text = "Как быть с мусором")
-                                    }
-                                }
-                                Box(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Column(
-                                        modifier = Modifier.fillMaxSize(),
-                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                        verticalArrangement = Arrangement.spacedBy(50.dp)
-                                    ) {
-                                        SwitcherCustom(
-                                            activities.value,
-                                            infoState.value,
-                                            { viewModel.setInfoBlock(it)})
-                                        when(infoState.value){
-                                            "Факты" ->{
-                                                val factListViewModel = FactListViewModel()
-                                                FactListUI(factListViewModel)
-                                            }
-                                            "Лидерборд" ->{
+                                })
+                            Icon(
+                                painter = painterResource(Res.drawable.menu),
+                                contentDescription = "Menu",
+                                tint = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.clickable {
 
-                                            }
-                                            else ->{
-
-                                            }
-                                        }
-                                    }
-                                }
-                            }else{
-
-                            }
+                                })
 
                         }
                     }
+                    Box(
+                        Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        when (orientation.value) {
+                            true -> {
+                                Row(
+                                    verticalAlignment = Alignment.Top,
+                                    horizontalArrangement = Arrangement.spacedBy(20.dp)
+                                ) {
 
-                    false -> {
+                                        Box(
+                                            modifier = Modifier.fillMaxWidth(0.5f),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Column(
+                                                modifier = Modifier.fillMaxSize(),
+                                                horizontalAlignment = Alignment.CenterHorizontally,
+                                                verticalArrangement = Arrangement.spacedBy(50.dp)
+                                            ) {
+                                                SwitcherCustom(
+                                                    listOf("Картинка", "Текст"),
+                                                    if (inputState.value) "Картинка" else "Текст",
+                                                    { viewModel.setInputState(if (it == "Картинка") true else false) })
+                                                if(inputState.value){
+                                                    CameraBox(400, { CameraBlock() })
+                                                }else{
+                                                    val textFieldViewModel= ChatBotViewModel()
+                                                    Box(){
+                                                        Column(horizontalAlignment = Alignment.CenterHorizontally,
+                                                            verticalArrangement = Arrangement.spacedBy(50.dp)) {
+                                                            Text("Расскажите, что вы хотите выбросить", style = MaterialTheme.typography.titleLarge)
+                                                            Box(modifier = Modifier.fillMaxWidth()){
+                                                                ChatBotUI(textFieldViewModel,"Опишите подробно, что предстоит выбросить")
+                                                            }
 
+                                                        }
+                                                    }
+                                                }
+
+
+                                                ButtonCustom({
+
+                                                }, text = "Как быть с мусором")
+                                            }
+                                        }
+                                        Box(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Column(
+                                                modifier = Modifier.fillMaxSize(),
+                                                horizontalAlignment = Alignment.CenterHorizontally,
+                                                verticalArrangement = Arrangement.spacedBy(50.dp)
+                                            ) {
+                                                SwitcherCustom(
+                                                    activities.value,
+                                                    infoState.value,
+                                                    { viewModel.setInfoBlock(it)})
+                                                when(infoState.value){
+                                                    "Факты" ->{
+                                                        val factListViewModel = FactListViewModel()
+                                                        FactListUI(factListViewModel)
+                                                    }
+                                                    "Лидерборд" ->{
+
+                                                    }
+                                                    else ->{
+
+                                                    }
+                                                }
+                                            }
+                                        }
+
+
+                                }
+                            }
+
+                            false -> {
+
+                            }
+                        }
                     }
+
+
                 }
+
+
             }
-
-
         }
 
     }
