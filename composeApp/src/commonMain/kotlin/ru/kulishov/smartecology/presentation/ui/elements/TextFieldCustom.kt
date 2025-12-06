@@ -13,6 +13,9 @@ import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.TransformedText
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.painterResource
 import smartecology.composeapp.generated.resources.Res
@@ -24,7 +27,11 @@ fun TextFieldCustom(
     text: String,
     onTextChange: (String) -> Unit,
     readOnly: Boolean,
-    placeholder: String
+    placeholder: String,
+    isError: Boolean=false,
+    isPassword:Boolean=false,
+    icon: Boolean = true,
+    width:Int = 5
 ) {
     OutlinedTextField(
         value = text,
@@ -32,11 +39,14 @@ fun TextFieldCustom(
         readOnly = readOnly,
         placeholder = { Text(placeholder, style = MaterialTheme.typography.bodyMedium) },
         leadingIcon = {
-            Icon(
-                painter = painterResource(Res.drawable.trash),
-                tint = Color(79, 79, 79),
-                contentDescription = "info"
-            )
+            if(icon){
+                Icon(
+                    painter = painterResource(Res.drawable.trash),
+                    tint = Color(79, 79, 79),
+                    contentDescription = "info"
+                )
+            }
+
         },
         shape = RoundedCornerShape(10.dp),
         colors = TextFieldColors(
@@ -87,7 +97,9 @@ fun TextFieldCustom(
                 backgroundColor = Color.Transparent
             )
         ),
+        isError=isError,
+        visualTransformation =if(isPassword) PasswordVisualTransformation() else VisualTransformation.None,
         modifier = Modifier.fillMaxWidth()
-            .border(width = 5.dp, color = MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(10.dp))
+            .border(width = width.dp, color = MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(10.dp))
     )
 }

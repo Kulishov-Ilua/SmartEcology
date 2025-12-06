@@ -29,16 +29,21 @@ import ru.kulishov.smartecology.domain.model.QuizeGame
 import ru.kulishov.smartecology.domain.model.Setting
 import ru.kulishov.smartecology.domain.model.StartQuize
 import ru.kulishov.smartecology.domain.model.TrashBox
+import ru.kulishov.smartecology.domain.usecase.person.AddPersonUseCase
 import ru.kulishov.smartecology.domain.usecase.settings.GetSettingsUseCase
 import ru.kulishov.smartecology.domain.usecase.settings.InsertSettingUseCase
 import ru.kulishov.smartecology.domain.usecase.settings.SetSettingsUseCase
+import ru.kulishov.smartecology.presentation.ui.adminpanel.AdminPanel
+import ru.kulishov.smartecology.presentation.ui.adminpanel.AdminPanelViewModel
 import ru.kulishov.smartecology.presentation.ui.camera.BaseViewModel
 import ru.kulishov.smartecology.presentation.ui.mainscreenblocs.contentblock.ContentBlockViewModel
 import ru.kulishov.smartecology.presentation.ui.mainscreenblocs.inputblock.InputBlockViewModel
 
 class MainScreenViewModel(
     private val getSettingsUseCase: GetSettingsUseCase,
-    private val insertSettingsUseCase: InsertSettingUseCase
+    private val insertSettingsUseCase: InsertSettingUseCase,
+    private val setSettingsUseCase: SetSettingsUseCase,
+    private val addPersonUseCase: AddPersonUseCase
 ) : BaseViewModel() {
     val client = HttpClient(CIO) {
         install(ContentNegotiation) {
@@ -53,7 +58,7 @@ class MainScreenViewModel(
     }
 
 
-    private val _settings = MutableStateFlow<Setting>(Setting(-1,false,false,false,false,false,false,false,
+    private val _settings = MutableStateFlow<Setting>(Setting(-1,"",false,false,false,false,false,false,false,
         emptyList(),emptyList(),emptyList(),emptyList(),emptyList(),emptyList()))
     val settings: StateFlow<Setting> = _settings.asStateFlow()
 
@@ -85,8 +90,11 @@ class MainScreenViewModel(
     private val _orientation = MutableStateFlow<Boolean>(true)
     val orientation: StateFlow<Boolean> = _orientation.asStateFlow()
 
-
-
+    var adminPanelViewModel = AdminPanelViewModel({
+        authAdmin(it)
+    }, {
+        authUser(it)
+    })
     var modelAnswer =""
 
 
@@ -107,15 +115,15 @@ class MainScreenViewModel(
     init {
         //_uiState.value= UiState.Loading
         launch {
-            insertSettingsUseCase(Setting(0,true,true,true,true,true,true,true,
-                questionListData.map { StartQuize(it.name,it.good,it.bad,it.output) },emptyList(),emptyList(),emptyList(),emptyList(),emptyList()))
+//            insertSettingsUseCase(Setting(0,"",true,true,true,true,true,true,true,
+//                questionListData.map { StartQuize(it.name,it.good,it.bad,it.output) },emptyList(),emptyList(),emptyList(),emptyList(),emptyList()))
 
             getSettingsUseCase().catch { e ->
                 _uiState.emit(UiState.Error(e.message ?: "Unknow error"))
             }.collect { set ->
 
-                if(set.size<1){
-                    insertSettingsUseCase(Setting(0,true,true,true,true,true,true,true,emptyList(),emptyList(),emptyList(),emptyList(),listOf("Факты", "Лидерборд"),emptyList()))
+                if(set.isEmpty()){
+                    insertSettingsUseCase(Setting(0,"",true,true,true,true,true,true,true,emptyList(),emptyList(),emptyList(),emptyList(),listOf("Факты", "Лидерборд"),emptyList()))
                 }
 
                 _settings.value=set[0]
@@ -135,7 +143,7 @@ class MainScreenViewModel(
                     quizeAccept = settings.value.quizeGameState,
                     quizeGame = settings.value.quizeGame
                 )
-
+                adminPanelViewModel.setPassword(settings.value.password)
 
                 println(settings.value)
             }
@@ -145,7 +153,19 @@ class MainScreenViewModel(
     }
 
 
+    fun authAdmin(password: String){
+        launch {
+            _settings.value.password=password
+            println(settings.value)
+           setSettingsUseCase(settings.value)
+        }
+    }
 
+    fun authUser(name: String){
+        launch {
+            addPersonUseCase(Person(0,name,0,"",0,""))
+        }
+    }
     fun setOrientation(state: Boolean) {
         launch {
             _orientation.value = state
@@ -289,6 +309,7 @@ class MainScreenViewModel(
         object Loading : UiState()
         object Success : UiState()
         object WebView: UiState()
+        object AdminPanel: UiState()
         data class Error(val message: String) : UiState()
     }
 

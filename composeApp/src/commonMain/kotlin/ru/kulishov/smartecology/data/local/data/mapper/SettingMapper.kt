@@ -12,6 +12,7 @@ object SettingsMapper {
     fun toDomain(entity: SettingsEntity): Setting {
         return Setting(
             id = entity.id,
+            password = entity.password,
             quizeState = entity.quizeState,
             textState = entity.textState,
             imageState = entity.imageState,
@@ -31,6 +32,7 @@ object SettingsMapper {
     fun toEntity(domain: Setting): SettingsEntity {
         return SettingsEntity(
             id = domain.id,
+            password = domain.password,
             quizeState = domain.quizeState,
             textState = domain.textState,
             imageState = domain.imageState,

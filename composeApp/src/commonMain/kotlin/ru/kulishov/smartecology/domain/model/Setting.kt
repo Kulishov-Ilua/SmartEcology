@@ -4,6 +4,7 @@ package ru.kulishov.smartecology.domain.model
 
 data class Setting(
     val id: Int,
+    var password: String,
     val quizeState: Boolean,
     val textState: Boolean,
     val imageState: Boolean,

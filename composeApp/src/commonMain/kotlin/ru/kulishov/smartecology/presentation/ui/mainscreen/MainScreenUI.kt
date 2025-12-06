@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.painterResource
+import ru.kulishov.smartecology.presentation.ui.adminpanel.AdminPanel
 import ru.kulishov.smartecology.presentation.ui.camera.CameraBlock
 import ru.kulishov.smartecology.presentation.ui.camera.CameraView
 import ru.kulishov.smartecology.presentation.ui.elements.ButtonCustom
@@ -97,7 +98,7 @@ fun MainScreenUI(
                                 contentDescription = "Menu",
                                 tint = MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier.clickable {
-
+                                    viewModel.setState(MainScreenViewModel.UiState.AdminPanel)
                                 })
 
                         }
@@ -228,6 +229,27 @@ fun MainScreenUI(
                     }
                 }
 
+            }
+
+            MainScreenViewModel.UiState.AdminPanel -> {
+                Column {
+                    Box(Modifier.padding(start = 20.dp, end = 20.dp).fillMaxWidth(), contentAlignment = Alignment.TopEnd) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(15.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(Res.drawable.exit),
+                                contentDescription = "Menu",
+                                tint = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.clickable {
+                                    viewModel.setState(MainScreenViewModel.UiState.Success)
+                                })
+
+                        }
+                    }
+                }
+                AdminPanel(viewModel.adminPanelViewModel)
             }
         }
 

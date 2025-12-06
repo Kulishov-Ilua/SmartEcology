@@ -25,8 +25,10 @@ import ru.kulishov.smartecology.data.local.AppDatabase
 import ru.kulishov.smartecology.data.local.repository.PersonRepositoryImpl
 import ru.kulishov.smartecology.data.local.repository.SettingRepositoryImpl
 import ru.kulishov.smartecology.domain.repository.SettingRepository
+import ru.kulishov.smartecology.domain.usecase.person.AddPersonUseCase
 import ru.kulishov.smartecology.domain.usecase.settings.GetSettingsUseCase
 import ru.kulishov.smartecology.domain.usecase.settings.InsertSettingUseCase
+import ru.kulishov.smartecology.domain.usecase.settings.SetSettingsUseCase
 import ru.kulishov.smartecology.presentation.ui.camera.CameraView
 import ru.kulishov.smartecology.presentation.ui.elements.CameraBox
 import ru.kulishov.smartecology.presentation.ui.elements.InfoCard
@@ -50,7 +52,8 @@ fun App(db: AppDatabase) {
 
         val mainScreenViewModel= MainScreenViewModel(
             GetSettingsUseCase(settingRepository),
-            InsertSettingUseCase(settingRepository))
+            InsertSettingUseCase(settingRepository), SetSettingsUseCase(settingRepository),
+            AddPersonUseCase(personRepository))
         Column(
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.surface)
