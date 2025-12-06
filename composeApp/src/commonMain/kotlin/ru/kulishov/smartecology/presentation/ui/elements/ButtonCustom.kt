@@ -44,6 +44,8 @@ fun ButtonCustom(
         contentPadding,
         interactionSource
     ) {
-        Text(text, style = MaterialTheme.typography.bodyMedium)
+        Text(text, style = MaterialTheme.typography.bodyMedium.copy(
+            color = colors.contentColor
+        ))
     }
 }

@@ -39,6 +39,8 @@ import ru.kulishov.smartecology.presentation.ui.elements.chatbot.ChatBotUI
 import ru.kulishov.smartecology.presentation.ui.elements.chatbot.ChatBotViewModel
 import ru.kulishov.smartecology.presentation.ui.elements.factlist.FactListUI
 import ru.kulishov.smartecology.presentation.ui.elements.factlist.FactListViewModel
+import ru.kulishov.smartecology.presentation.ui.elements.quize.QuizeUI
+import ru.kulishov.smartecology.presentation.ui.elements.quize.QuizeViewModel
 import smartecology.composeapp.generated.resources.Res
 import smartecology.composeapp.generated.resources.manual
 import smartecology.composeapp.generated.resources.menu
@@ -57,6 +59,7 @@ fun MainScreenUI(
     val activities = viewModel.activities.collectAsState()
     val textFieldViewModel= ChatBotViewModel()
     var shot by remember { mutableStateOf(false) }
+    val quizeViewModel= QuizeViewModel()
 
     Box(Modifier.padding(top = 25.dp).fillMaxSize()) {
         when(uiState.value){
@@ -117,14 +120,25 @@ fun MainScreenUI(
                                                 verticalArrangement = Arrangement.spacedBy(50.dp)
                                             ) {
                                                 SwitcherCustom(
-                                                    listOf("Картинка", "Текст"),
-                                                    if (inputState.value) "Картинка" else "Текст",
-                                                    { viewModel.setInputState(if (it == "Картинка") true else false) })
-                                                if(inputState.value){
+                                                    listOf("Картинка", "Текст", "Квиз"),
+                                                    if (inputState.value==0) "Картинка" else if (inputState.value==1)"Текст" else "Квиз",
+                                                    { it-> viewModel.setInputState(
+                                                        when(it){
+                                                            "Картинка" ->{
+                                                                0
+                                                            }
+                                                            "Текст" -> {
+                                                                1
+                                                            }
+                                                            else ->{
+                                                                2
+                                                            }
+                                                        } )})
+                                                if(inputState.value==0){
                                                     CameraBox(400, { CameraBlock({viewModel.imagePrompt(it)
                                                                                  shot=false
                                                                                  },shot) })
-                                                }else{
+                                                }else if(inputState.value==1){
 
                                                     Box(){
                                                         Column(horizontalAlignment = Alignment.CenterHorizontally,
@@ -136,16 +150,22 @@ fun MainScreenUI(
 
                                                         }
                                                     }
+                                                }else{
+                                                    Box(modifier = Modifier.padding(start = 20.dp,end=20.dp)){
+                                                        QuizeUI(quizeViewModel,{viewModel.modelAnswer=it
+                                                            viewModel.setState(MainScreenViewModel.UiState.Result)})
+                                                    }
+
                                                 }
 
 
                                                 ButtonCustom({
-                                                    if(inputState.value){
+                                                    if(inputState.value==0){
                                                         shot=true
                                                     }else{
                                                         viewModel.textRequest(textFieldViewModel.input.value)
                                                     }
-                                                }, text = "Как быть с мусором")
+                                                }, text = "Как быть с мусором", colors = ButtonDefaults.buttonColors().copy(contentColor = MaterialTheme.colorScheme.onSurface))
                                             }
                                         }
                                         Box(
@@ -207,18 +227,18 @@ fun MainScreenUI(
                             Row(horizontalArrangement = Arrangement.spacedBy(15.dp)) {
                                 ButtonCustom({
                                     textFieldViewModel.setReadOnly(false)
-                                    viewModel.setInputState(false)
+                                    viewModel.setInputState(1)
                                     viewModel.setState(MainScreenViewModel.UiState.Success)
                                 }, text = "Не верно",
                                     colors = ButtonDefaults.buttonColors(
                                         containerColor = MaterialTheme.colorScheme.onSurface,
-                                        contentColor = Color.Red,
-                                        disabledContentColor = Color.Red
+                                        contentColor = MaterialTheme.colorScheme.onSurface,
+                                        disabledContentColor = Color.Gray
                                     ))
 
                                 ButtonCustom({
                                     viewModel.textRequest(textFieldViewModel.input.value)
-                                }, text = "Верно")
+                                }, text = "Верно",colors = ButtonDefaults.buttonColors().copy(contentColor = MaterialTheme.colorScheme.onSurface))
                             }
 
                         }
@@ -236,15 +256,15 @@ fun MainScreenUI(
                                 verticalArrangement = Arrangement.spacedBy(50.dp)) {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally,
                                     verticalArrangement = Arrangement.spacedBy(50.dp)) {
-                                    Text("Мои рекоммендации", style = MaterialTheme.typography.titleLarge)
+                                    Text("Мои рекомендации", style = MaterialTheme.typography.titleLarge)
                                     Box(modifier = Modifier.fillMaxWidth()){
-                                        ChatBotUI(textFieldViewModel,"Мои рекоммендации")
+                                        ChatBotUI(textFieldViewModel,"Мои рекомендации")
                                     }
                                     Row(horizontalArrangement = Arrangement.spacedBy(15.dp)) {
                                         ButtonCustom({
                                             textFieldViewModel.setReadOnly(false)
                                             viewModel.setState(MainScreenViewModel.UiState.Success)
-                                        }, text = "Спасибо")
+                                        }, text = "Спасибо",colors = ButtonDefaults.buttonColors().copy(contentColor = MaterialTheme.colorScheme.onSurface))
                                     }
 
 
@@ -257,7 +277,7 @@ fun MainScreenUI(
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter){
                     MagicBottomIsland(1,listOf(0,300), onChange = {},{
                         Row(horizontalArrangement = Arrangement.spacedBy(50.dp)) {
-                            TrashBox(state = if (viewModel.modelAnswer.contains("пластик")||viewModel.modelAnswer.contains("пластик")||viewModel.modelAnswer.contains("**пластик**")) true else false,Res.drawable.plastic,"Пластик",Color.Yellow)
+                            TrashBox(state = if (viewModel.modelAnswer.contains("пластик")||viewModel.modelAnswer.contains("Пластик")||viewModel.modelAnswer.contains("**пластик**")) true else false,Res.drawable.plastic,"Пластик",Color.Yellow)
                             TrashBox(state = if (viewModel.modelAnswer.contains("стекло")||viewModel.modelAnswer.contains("Стекло")||viewModel.modelAnswer.contains("**стекло**")) true else false,Res.drawable.plastic,"Стекло",Color(21,0,255))
                             TrashBox(state = if (viewModel.modelAnswer.contains("буиага")||viewModel.modelAnswer.contains("Бумага")||viewModel.modelAnswer.contains("**бумага**")) true else false,Res.drawable.plastic,"Бумага",Color(8,154,0))
                             TrashBox(state = if (viewModel.modelAnswer.contains("другое")||viewModel.modelAnswer.contains("Другое")||viewModel.modelAnswer.contains("**другое**")) true else false,Res.drawable.plastic,"Другое",Color(204,81,39))

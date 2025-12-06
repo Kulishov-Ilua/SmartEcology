@@ -43,8 +43,8 @@ class MainScreenViewModel() : BaseViewModel() {
     private val _infoState = MutableStateFlow<String>("Факты")
     val infoState: StateFlow<String> = _infoState.asStateFlow()
 
-    private val _inputState = MutableStateFlow<Boolean>(true)
-    val inputState: StateFlow<Boolean> = _inputState.asStateFlow()
+    private val _inputState = MutableStateFlow<Int>(0)
+    val inputState: StateFlow<Int> = _inputState.asStateFlow()
 
     private val _orientation = MutableStateFlow<Boolean>(true)
     val orientation: StateFlow<Boolean> = _orientation.asStateFlow()
@@ -58,7 +58,7 @@ class MainScreenViewModel() : BaseViewModel() {
     var modelAnswer =""
 
 
-    fun setInputState(state: Boolean) {
+    fun setInputState(state: Int) {
         launch {
             _inputState.value = state
         }
@@ -161,7 +161,7 @@ class MainScreenViewModel() : BaseViewModel() {
             try {
                 val jsonBody = """
             {
-                "model": "ai/qwen3",
+                "model": "ai/gemma3",
                 "messages": [
                     {
                         "role": "system",
