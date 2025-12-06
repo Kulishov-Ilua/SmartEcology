@@ -43,6 +43,7 @@ fun MainScreenUI(
     val infoState = viewModel.infoState.collectAsState()
     val inputState = viewModel.inputState.collectAsState()
     val activities = viewModel.activities.collectAsState()
+    val textFieldViewModel= ChatBotViewModel()
 
     Box(Modifier.fillMaxSize()) {
         when(uiState.value){
@@ -106,7 +107,7 @@ fun MainScreenUI(
                                                 if(inputState.value){
                                                     CameraBox(400, { CameraBlock() })
                                                 }else{
-                                                    val textFieldViewModel= ChatBotViewModel()
+
                                                     Box(){
                                                         Column(horizontalAlignment = Alignment.CenterHorizontally,
                                                             verticalArrangement = Arrangement.spacedBy(50.dp)) {
@@ -121,7 +122,11 @@ fun MainScreenUI(
 
 
                                                 ButtonCustom({
+                                                    if(inputState.value){
 
+                                                    }else{
+                                                        viewModel.textRequest(textFieldViewModel.input.value)
+                                                    }
                                                 }, text = "Как быть с мусором")
                                             }
                                         }
@@ -166,6 +171,12 @@ fun MainScreenUI(
 
                 }
 
+
+            }
+
+            MainScreenViewModel.UiState.Accept -> {
+            }
+            MainScreenViewModel.UiState.Result -> {
 
             }
         }
