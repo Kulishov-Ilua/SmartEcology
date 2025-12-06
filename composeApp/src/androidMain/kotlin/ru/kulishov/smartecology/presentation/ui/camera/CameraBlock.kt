@@ -11,7 +11,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 
 @Composable
-actual fun CameraBlock() {
+actual fun CameraBlock(onSaved: (String) -> Unit,shot: Boolean) {
     val context = LocalContext.current
     var hasCameraPermission by remember {
         mutableStateOf(
@@ -23,7 +23,7 @@ actual fun CameraBlock() {
     }
 
     if (hasCameraPermission) {
-        CameraPreview(shot = false,{})
+        CameraPreview(shot = shot,{onSaved(it)})
     } else {
         PermissionScreen {
             hasCameraPermission = it

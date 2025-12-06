@@ -19,11 +19,22 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.serialization.json.Json
 import ru.kulishov.smartecology.data.SystemPrompt
+import ru.kulishov.smartecology.data.SystemPrompt2
 import ru.kulishov.smartecology.data.remote.model.ChatCompletionResponse
 import ru.kulishov.smartecology.presentation.ui.camera.BaseViewModel
 
 class MainScreenViewModel() : BaseViewModel() {
-    val client = HttpClient(CIO)
+    val client = HttpClient(CIO) {
+        install(ContentNegotiation) {
+            json(Json {
+                prettyPrint = true
+                isLenient = true
+                ignoreUnknownKeys = true
+            })
+        }
+
+
+    }
     private val _uiState = MutableStateFlow<UiState>(UiState.Success)
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
@@ -42,6 +53,8 @@ class MainScreenViewModel() : BaseViewModel() {
     private val _activitiesMap = MutableStateFlow<Map<String, String>>(mapOf())
     val activitiesMap: StateFlow<Map<String, String>> = _activitiesMap.asStateFlow()
 
+    var modelAnswer =""
+
 
     fun setInputState(state: Boolean) {
         launch {
@@ -59,6 +72,70 @@ class MainScreenViewModel() : BaseViewModel() {
     fun setInfoBlock(state: String) {
         _infoState.value = state
     }
+    fun imagePrompt(base64Image: String){
+        launch {
+            println("photo")
+            _uiState.value = UiState.Loading
+
+            try {
+
+                val jsonBody = """
+                {
+                    "model": "ai/gemma3",
+                    "messages": [
+                        {
+                            "role": "system",
+                            "content": "$SystemPrompt"
+                        },
+                        {
+                            "role": "user",
+                            "content": [
+                                {
+                                    "type": "text",
+                                    "text": "Это пытаются выбросить. Определи что на фотографии и скажи, в какие контейнеры"
+                                },
+                                {
+                                    "type": "image_url",
+                                    "image_url": {
+                                        "url": "data:image/jpeg;base64,$base64Image"
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    "max_tokens": 500,
+                    "temperature": 0.1
+                }
+                """.trimIndent()
+
+                val response: HttpResponse =
+                    client.post("http://10.0.2.2:12434/engines/llama.cpp/v1/chat/completions") {
+                        contentType(ContentType.Application.Json)
+                        setBody(jsonBody)
+                        timeout {
+                            requestTimeoutMillis = 120000L
+                            connectTimeoutMillis = 30000L
+                            socketTimeoutMillis = 240000L
+                        }
+                    }
+
+
+                val responseText = response.bodyAsText()
+                println("Сырой ответ: $responseText")
+
+                val parsedResponse = Json { ignoreUnknownKeys = true }
+                    .decodeFromString<ChatCompletionResponse>(responseText)
+
+                println("Status: ${parsedResponse.id}")
+                println("Response: ${parsedResponse.choices[0].message}")
+                modelAnswer=parsedResponse.choices[0].message.content
+            }catch (e: Exception){
+                println(e)
+            }
+            _uiState.value= UiState.Success
+
+        }
+    }
 
     fun textRequest(text: String){
 
@@ -66,25 +143,13 @@ class MainScreenViewModel() : BaseViewModel() {
             _uiState.value = UiState.Loading
 
             try {
-
-                val client = HttpClient(CIO) {
-                    install(ContentNegotiation) {
-                        json(Json {
-                            prettyPrint = true
-                            isLenient = true
-                            ignoreUnknownKeys = true
-                        })
-                    }
-
-
-                }
                 val jsonBody = """
         {
             "model": "ai/gemma3",
             "messages": [
                 {
                     "role": "system",
-                    "content": "$SystemPrompt"
+                    "content": "$SystemPrompt2"
                 },
                 {
                     "role": "user",
@@ -114,6 +179,7 @@ class MainScreenViewModel() : BaseViewModel() {
 
                 println("Status: ${parsedResponse.id}")
                 println("Response: ${parsedResponse.choices[0].message}")
+                modelAnswer=parsedResponse.choices[0].message.content
             }catch (e: Exception){
                 println(e)
             }
