@@ -1,11 +1,9 @@
 package ru.kulishov.smartecology.presentation.ui.mainscreen
 
 
-import androidx.compose.runtime.Composable
-import androidx.lifecycle.ViewModel
+import androidx.room.RoomDatabase
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
-import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.timeout
 import io.ktor.client.request.post
@@ -18,14 +16,30 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.serialization.json.Json
 import ru.kulishov.smartecology.data.SystemPrompt
-import ru.kulishov.smartecology.data.SystemPrompt2
-import ru.kulishov.smartecology.data.imagePromptText
+import ru.kulishov.smartecology.data.local.AppDatabase
+import ru.kulishov.smartecology.data.local.getRoomDatabase
+import ru.kulishov.smartecology.data.local.repository.SettingRepositoryImpl
+import ru.kulishov.smartecology.data.questionListData
 import ru.kulishov.smartecology.data.remote.model.ChatCompletionResponse
+import ru.kulishov.smartecology.domain.model.Person
+import ru.kulishov.smartecology.domain.model.QuizeGame
+import ru.kulishov.smartecology.domain.model.Setting
+import ru.kulishov.smartecology.domain.model.StartQuize
+import ru.kulishov.smartecology.domain.model.TrashBox
+import ru.kulishov.smartecology.domain.usecase.settings.GetSettingsUseCase
+import ru.kulishov.smartecology.domain.usecase.settings.InsertSettingUseCase
+import ru.kulishov.smartecology.domain.usecase.settings.SetSettingsUseCase
 import ru.kulishov.smartecology.presentation.ui.camera.BaseViewModel
+import ru.kulishov.smartecology.presentation.ui.mainscreenblocs.contentblock.ContentBlockViewModel
+import ru.kulishov.smartecology.presentation.ui.mainscreenblocs.inputblock.InputBlockViewModel
 
-class MainScreenViewModel() : BaseViewModel() {
+class MainScreenViewModel(
+    private val getSettingsUseCase: GetSettingsUseCase,
+    private val insertSettingsUseCase: InsertSettingUseCase
+) : BaseViewModel() {
     val client = HttpClient(CIO) {
         install(ContentNegotiation) {
             json(Json {
@@ -37,33 +51,101 @@ class MainScreenViewModel() : BaseViewModel() {
 
 
     }
+
+
+    private val _settings = MutableStateFlow<Setting>(Setting(-1,false,false,false,false,false,false,false,
+        emptyList(),emptyList(),emptyList(),emptyList(),emptyList(),emptyList()))
+    val settings: StateFlow<Setting> = _settings.asStateFlow()
+
     private val _uiState = MutableStateFlow<UiState>(UiState.Success)
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
-    private val _infoState = MutableStateFlow<String>("Факты")
-    val infoState: StateFlow<String> = _infoState.asStateFlow()
 
-    private val _inputState = MutableStateFlow<Int>(0)
-    val inputState: StateFlow<Int> = _inputState.asStateFlow()
+
+
+
+
+    private val _staticticState = MutableStateFlow<Boolean>(false)
+    val staticticState: StateFlow<Boolean> = _staticticState.asStateFlow()
+
+
+
+    private val _facts = MutableStateFlow<List<String>>(emptyList())
+    val facts: StateFlow<List<String>> = _facts.asStateFlow()
+
+
+
+    private val _boxes = MutableStateFlow<List<TrashBox>>(emptyList())
+    val boxes: StateFlow<List<TrashBox>> = _boxes.asStateFlow()
+
+
+
+
 
     private val _orientation = MutableStateFlow<Boolean>(true)
     val orientation: StateFlow<Boolean> = _orientation.asStateFlow()
 
-    private val _activities = MutableStateFlow<List<String>>(listOf("Факты", "Лидерборд"))
-    val activities: StateFlow<List<String>> = _activities.asStateFlow()
 
-    private val _activitiesMap = MutableStateFlow<Map<String, String>>(mapOf())
-    val activitiesMap: StateFlow<Map<String, String>> = _activitiesMap.asStateFlow()
 
     var modelAnswer =""
 
 
-    fun setInputState(state: Int) {
+
+    val inputBlockViewModel = InputBlockViewModel(
+        onTextPrompt = {
+            textRequest(it)
+        }, onImagePrompt = {
+            imagePrompt(it)
+        }, onAnswer = {
+            modelAnswer=it
+            _uiState.value= UiState.Result
+        })
+    val contentBlockViewModel = ContentBlockViewModel()
+
+
+
+    init {
+        //_uiState.value= UiState.Loading
         launch {
-            _inputState.value = state
+            insertSettingsUseCase(Setting(0,true,true,true,true,true,true,true,
+                questionListData.map { StartQuize(it.name,it.good,it.bad,it.output) },emptyList(),emptyList(),emptyList(),emptyList(),emptyList()))
+
+            getSettingsUseCase().catch { e ->
+                _uiState.emit(UiState.Error(e.message ?: "Unknow error"))
+            }.collect { set ->
+
+                if(set.size<1){
+                    insertSettingsUseCase(Setting(0,true,true,true,true,true,true,true,emptyList(),emptyList(),emptyList(),emptyList(),listOf("Факты", "Лидерборд"),emptyList()))
+                }
+
+                _settings.value=set[0]
+
+                //_activities.value=settings.value.activities
+                _facts.value=settings.value.facts
+                _quizeGame.value=settings.value.quizeGame
+                _boxes.value=settings.value.boxes
+
+                inputBlockViewModel.setData(
+                    settings.value.imageState,
+                    settings.value.textState,
+                    settings.value.quizeState
+                )
+                contentBlockViewModel.setData(
+                    settings.value.activities,
+                    factAccept = settings.value.factsState,
+                    topAccept = settings.value.topListState,
+                    quizeAccept = settings.value.quizeGameState
+                )
+
+
+                println(settings.value)
+            }
+            //_uiState.value= UiState.Success
         }
 
     }
+
+
 
     fun setOrientation(state: Boolean) {
         launch {
@@ -71,9 +153,7 @@ class MainScreenViewModel() : BaseViewModel() {
         }
     }
 
-    fun setInfoBlock(state: String) {
-        _infoState.value = state
-    }
+
 
     fun setState(state: UiState){
         _uiState.value=state
@@ -145,11 +225,11 @@ class MainScreenViewModel() : BaseViewModel() {
     }
     fun escapeForJson(input: String): String {
         return input
-            .replace("\\", "\\\\")  // обратный слеш
-            .replace("\"", "\\\"")  // кавычки
-            .replace("\n", "\\n")   // перенос строки
-            .replace("\r", "\\r")   // возврат каретки
-            .replace("\t", "\\t")   // табуляция
+            .replace("\\", "\\\\")
+            .replace("\"", "\\\"")
+            .replace("\n", "\\n")
+            .replace("\r", "\\r")
+            .replace("\t", "\\t")
     }
 
 
@@ -212,5 +292,6 @@ class MainScreenViewModel() : BaseViewModel() {
         object WebView: UiState()
         data class Error(val message: String) : UiState()
     }
+
 }
 

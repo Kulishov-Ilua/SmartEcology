@@ -1,5 +1,6 @@
 package ru.kulishov.smartecology
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -11,23 +12,40 @@ import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import ru.kulishov.smartecology.data.getDatabaseBuilder
+import ru.kulishov.smartecology.data.local.getRoomDatabase
+import ru.kulishov.smartecology.data.local.repository.PersonRepositoryImpl
+import ru.kulishov.smartecology.data.local.repository.SettingRepositoryImpl
+import ru.kulishov.smartecology.domain.usecase.settings.GetSettingsUseCase
+import ru.kulishov.smartecology.domain.usecase.settings.InsertSettingUseCase
 import ru.kulishov.smartecology.presentation.ui.camera.CameraBlock
 import ru.kulishov.smartecology.presentation.ui.camera.CameraView
+import ru.kulishov.smartecology.presentation.ui.mainscreen.MainScreenViewModel
 
 class MainActivity : ComponentActivity() {
+    @SuppressLint("CoroutineCreationDuringComposition")
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        val db = getRoomDatabase(getDatabaseBuilder(this))
+
+
 
         setContent {
             AppTheme {
-                App()
+
+                App(db)
             }
 
             //CameraBlock()
@@ -38,7 +56,7 @@ class MainActivity : ComponentActivity() {
 @Preview
 @Composable
 fun AppAndroidPreview() {
-    App()
+    //App()
 }
 
 @Composable

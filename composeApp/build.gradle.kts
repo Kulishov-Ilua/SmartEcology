@@ -8,6 +8,8 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeHotReload)
+    alias(libs.plugins.room)
+    alias(libs.plugins.ksp)
     kotlin("plugin.serialization") version "2.2.21"
 }
 
@@ -19,6 +21,7 @@ kotlin {
     }
     
     listOf(
+        //iosX64(),
         iosArm64(),
         iosSimulatorArm64()
     ).forEach { iosTarget ->
@@ -30,17 +33,17 @@ kotlin {
     
     jvm()
     
-    js {
-        browser()
-        binaries.executable()
-    }
-    
-    @OptIn(ExperimentalWasmDsl::class)
-    wasmJs {
-        browser()
-        binaries.executable()
-    }
-    
+//    js {
+//        browser()
+//        binaries.executable()
+//    }
+//
+//    @OptIn(ExperimentalWasmDsl::class)
+//    wasmJs {
+//        browser()
+//        binaries.executable()
+//    }
+//
     sourceSets {
         androidMain.dependencies {
             implementation(compose.preview)
@@ -65,6 +68,11 @@ kotlin {
             implementation(libs.ktor.client.cio)
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.serialization.kotlinx.json)
+
+            implementation(libs.room.runtime)
+            implementation(libs.sqlite.bundled)
+            implementation(libs.gson)
+
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -106,6 +114,12 @@ android {
 dependencies {
     debugImplementation(compose.uiTooling)
 }
+room {
+    schemaDirectory("$projectDir/schemas")
+}
+
+
+
 
 compose.desktop {
     application {
@@ -117,4 +131,15 @@ compose.desktop {
             packageVersion = "1.0.0"
         }
     }
+}
+
+dependencies {
+    debugImplementation(compose.uiTooling)
+    with(libs.room.compiler){
+        add("kspAndroid", this)
+        add("kspJvm", this)
+        add("kspIosArm64", this)
+        add("kspIosSimulatorArm64", this)
+    }
+
 }

@@ -18,8 +18,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import androidx.room.RoomDatabase
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import ru.kulishov.smartecology.data.local.AppDatabase
+import ru.kulishov.smartecology.data.local.repository.PersonRepositoryImpl
+import ru.kulishov.smartecology.data.local.repository.SettingRepositoryImpl
+import ru.kulishov.smartecology.domain.repository.SettingRepository
+import ru.kulishov.smartecology.domain.usecase.settings.GetSettingsUseCase
+import ru.kulishov.smartecology.domain.usecase.settings.InsertSettingUseCase
 import ru.kulishov.smartecology.presentation.ui.camera.CameraView
 import ru.kulishov.smartecology.presentation.ui.elements.CameraBox
 import ru.kulishov.smartecology.presentation.ui.elements.InfoCard
@@ -36,8 +43,14 @@ import smartecology.composeapp.generated.resources.trash
 
 @Composable
 @Preview
-fun App() {
-        var showContent by remember { mutableStateOf(false) }
+fun App(db: AppDatabase) {
+            var showContent by remember { mutableStateOf(false) }
+        val settingRepository= SettingRepositoryImpl(db.settingDao())
+        val personRepository = PersonRepositoryImpl(db.personDao())
+
+        val mainScreenViewModel= MainScreenViewModel(
+            GetSettingsUseCase(settingRepository),
+            InsertSettingUseCase(settingRepository))
         Column(
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.surface)
@@ -45,7 +58,7 @@ fun App() {
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            val mainScreenViewModel= MainScreenViewModel()
+
             MainScreenUI(true, mainScreenViewModel)
 
         }
