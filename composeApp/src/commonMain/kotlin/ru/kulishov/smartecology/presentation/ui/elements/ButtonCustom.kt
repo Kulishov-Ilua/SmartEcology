@@ -23,7 +23,7 @@ fun ButtonCustom(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    shape: Shape = RoundedCornerShape(5),
+    shape: Shape = RoundedCornerShape(10),
     colors: ButtonColors = ButtonDefaults.buttonColors(
         containerColor = Color(255, 222, 0)
     ),

@@ -12,11 +12,16 @@ class ChatBotViewModel(): BaseViewModel(){
 
     private val _input = MutableStateFlow<String>("")
     val input: StateFlow<String> = _input.asStateFlow()
+    private val _readOnnly = MutableStateFlow<Boolean>(false)
+    val readOnly: StateFlow<Boolean> = _readOnnly.asStateFlow()
 
     fun setInput(inp:String){
         _input.value=inp
     }
 
+    fun setReadOnly(state: Boolean){
+        _readOnnly.value=state
+    }
 
     sealed class UiState {
         object Blocked : UiState()

@@ -8,6 +8,7 @@ import ru.kulishov.smartecology.presentation.ui.elements.TextFieldCustom
 fun ChatBotUI(viewModel: ChatBotViewModel,placeholder: String) {
     val input = viewModel.input.collectAsState()
     val uiState = viewModel.uiState.collectAsState()
+    var readOnly = viewModel.readOnly.collectAsState()
     when (uiState.value) {
         ChatBotViewModel.UiState.Blocked -> {
             TextFieldCustom(input.value, { viewModel.setInput(it) }, true,placeholder)
@@ -22,7 +23,7 @@ fun ChatBotUI(viewModel: ChatBotViewModel,placeholder: String) {
         }
 
         ChatBotViewModel.UiState.Success -> {
-            TextFieldCustom(input.value, { viewModel.setInput(it) }, false,placeholder)
+            TextFieldCustom(input.value, { viewModel.setInput(it) }, readOnly.value,placeholder)
         }
     }
 

@@ -9,6 +9,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -21,14 +24,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.painterResource
 import ru.kulishov.smartecology.presentation.ui.camera.CameraBlock
 import ru.kulishov.smartecology.presentation.ui.camera.CameraView
 import ru.kulishov.smartecology.presentation.ui.elements.ButtonCustom
 import ru.kulishov.smartecology.presentation.ui.elements.CameraBox
+import ru.kulishov.smartecology.presentation.ui.elements.MagicBottomIsland
 import ru.kulishov.smartecology.presentation.ui.elements.SwitcherCustom
 import ru.kulishov.smartecology.presentation.ui.elements.TextFieldCustom
+import ru.kulishov.smartecology.presentation.ui.elements.TrashBox
 import ru.kulishov.smartecology.presentation.ui.elements.chatbot.ChatBotUI
 import ru.kulishov.smartecology.presentation.ui.elements.chatbot.ChatBotViewModel
 import ru.kulishov.smartecology.presentation.ui.elements.factlist.FactListUI
@@ -36,6 +42,7 @@ import ru.kulishov.smartecology.presentation.ui.elements.factlist.FactListViewMo
 import smartecology.composeapp.generated.resources.Res
 import smartecology.composeapp.generated.resources.manual
 import smartecology.composeapp.generated.resources.menu
+import smartecology.composeapp.generated.resources.plastic
 
 @Composable
 fun MainScreenUI(
@@ -51,7 +58,7 @@ fun MainScreenUI(
     val textFieldViewModel= ChatBotViewModel()
     var shot by remember { mutableStateOf(false) }
 
-    Box(Modifier.fillMaxSize()) {
+    Box(Modifier.padding(top = 25.dp).fillMaxSize()) {
         when(uiState.value){
             is MainScreenViewModel.UiState.Error -> {
 
@@ -64,9 +71,9 @@ fun MainScreenUI(
             MainScreenViewModel.UiState.Success -> {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.padding(start = 20.dp, end = 20.dp)
+                   // modifier = Modifier.padding(start = 20.dp, end = 20.dp)
                 ) {
-                    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.TopEnd) {
+                    Box(Modifier.padding(start = 20.dp, end = 20.dp).fillMaxWidth(), contentAlignment = Alignment.TopEnd) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(15.dp)
@@ -96,7 +103,8 @@ fun MainScreenUI(
                             true -> {
                                 Row(
                                     verticalAlignment = Alignment.Top,
-                                    horizontalArrangement = Arrangement.spacedBy(20.dp)
+                                    horizontalArrangement = Arrangement.spacedBy(20.dp),
+                                    modifier = Modifier.padding(start = 20.dp, end = 20.dp)
                                 ) {
 
                                         Box(
@@ -185,9 +193,80 @@ fun MainScreenUI(
             }
 
             MainScreenViewModel.UiState.Accept -> {
+                textFieldViewModel.setInput(viewModel.modelAnswer)
+                textFieldViewModel.setReadOnly(true)
+                Box(Modifier.padding(start = 20.dp, end = 20.dp).fillMaxSize(), contentAlignment = Alignment.Center){
+                    Column(horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(50.dp)) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(50.dp)) {
+                            Text("Мои предположения", style = MaterialTheme.typography.titleLarge)
+                            Box(modifier = Modifier.fillMaxWidth()){
+                                ChatBotUI(textFieldViewModel,"Мои предположения")
+                            }
+                            Row(horizontalArrangement = Arrangement.spacedBy(15.dp)) {
+                                ButtonCustom({
+                                    textFieldViewModel.setReadOnly(false)
+                                    viewModel.setInputState(false)
+                                    viewModel.setState(MainScreenViewModel.UiState.Success)
+                                }, text = "Не верно",
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.onSurface,
+                                        contentColor = Color.Red,
+                                        disabledContentColor = Color.Red
+                                    ))
+
+                                ButtonCustom({
+                                    viewModel.textRequest(textFieldViewModel.input.value)
+                                }, text = "Верно")
+                            }
+
+                        }
+                    }
+                }
 
             }
             MainScreenViewModel.UiState.Result -> {
+                textFieldViewModel.setInput(viewModel.modelAnswer)
+                textFieldViewModel.setReadOnly(true)
+                LazyColumn {
+                    item{
+                        Box(Modifier.padding(start = 20.dp, end = 20.dp, bottom = 300.dp).fillMaxSize(), contentAlignment = Alignment.TopCenter){
+                            Column(horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(50.dp)) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(50.dp)) {
+                                    Text("Мои рекоммендации", style = MaterialTheme.typography.titleLarge)
+                                    Box(modifier = Modifier.fillMaxWidth()){
+                                        ChatBotUI(textFieldViewModel,"Мои рекоммендации")
+                                    }
+                                    Row(horizontalArrangement = Arrangement.spacedBy(15.dp)) {
+                                        ButtonCustom({
+                                            textFieldViewModel.setReadOnly(false)
+                                            viewModel.setState(MainScreenViewModel.UiState.Success)
+                                        }, text = "Спасибо")
+                                    }
+
+
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter){
+                    MagicBottomIsland(1,listOf(0,300), onChange = {},{
+                        Row(horizontalArrangement = Arrangement.spacedBy(50.dp)) {
+                            TrashBox(state = if (viewModel.modelAnswer.contains("пластик")||viewModel.modelAnswer.contains("пластик")||viewModel.modelAnswer.contains("**пластик**")) true else false,Res.drawable.plastic,"Пластик",Color.Yellow)
+                            TrashBox(state = if (viewModel.modelAnswer.contains("стекло")||viewModel.modelAnswer.contains("Стекло")||viewModel.modelAnswer.contains("**стекло**")) true else false,Res.drawable.plastic,"Стекло",Color(21,0,255))
+                            TrashBox(state = if (viewModel.modelAnswer.contains("буиага")||viewModel.modelAnswer.contains("Бумага")||viewModel.modelAnswer.contains("**бумага**")) true else false,Res.drawable.plastic,"Бумага",Color(8,154,0))
+                            TrashBox(state = if (viewModel.modelAnswer.contains("другое")||viewModel.modelAnswer.contains("Другое")||viewModel.modelAnswer.contains("**другое**")) true else false,Res.drawable.plastic,"Другое",Color(204,81,39))
+
+
+                        }
+                    })
+                }
+
 
             }
         }
