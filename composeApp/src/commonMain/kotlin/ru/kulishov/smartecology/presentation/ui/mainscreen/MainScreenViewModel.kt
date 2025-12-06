@@ -120,9 +120,7 @@ class MainScreenViewModel(
 
                 _settings.value=set[0]
 
-                //_activities.value=settings.value.activities
                 _facts.value=settings.value.facts
-                _quizeGame.value=settings.value.quizeGame
                 _boxes.value=settings.value.boxes
 
                 inputBlockViewModel.setData(
@@ -134,7 +132,8 @@ class MainScreenViewModel(
                     settings.value.activities,
                     factAccept = settings.value.factsState,
                     topAccept = settings.value.topListState,
-                    quizeAccept = settings.value.quizeGameState
+                    quizeAccept = settings.value.quizeGameState,
+                    quizeGame = settings.value.quizeGame
                 )
 
 

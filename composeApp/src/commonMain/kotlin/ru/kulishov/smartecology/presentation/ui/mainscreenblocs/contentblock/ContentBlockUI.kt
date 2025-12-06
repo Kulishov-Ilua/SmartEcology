@@ -20,7 +20,9 @@ fun ContentBlockUI(
 ){
     val activities = viewModel.activities.collectAsState()
     val infoState = viewModel.infoState.collectAsState()
-    va
+    val factAccept = viewModel.factAccept.collectAsState()
+    val topAccept = viewModel.topListState.collectAsState()
+    val quizeAccept = viewModel.quizeGameState.collectAsState()
     Box(
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.Center
@@ -31,9 +33,11 @@ fun ContentBlockUI(
             verticalArrangement = Arrangement.spacedBy(50.dp)
         ) {
             val createdList = mutableListOf<String>()
-            if()
+            if(topAccept.value) createdList+="Лидерборд"
+            if(factAccept.value) createdList+="Факты"
+            if(quizeAccept.value) createdList+="Квиз"
             SwitcherCustom(
-                listOf() + activities.value,
+                createdList + activities.value,
                 infoState.value,
                 { viewModel.setInfoBlock(it)})
             when(infoState.value){
