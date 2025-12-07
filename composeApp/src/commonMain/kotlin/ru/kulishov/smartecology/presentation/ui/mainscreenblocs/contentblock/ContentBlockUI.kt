@@ -54,7 +54,7 @@ fun ContentBlockUI(
                     TopScreen(person.value)
                 }
                 else ->{
-                    WebPreview("https://oggetto.ru/")
+                    WebPreview("https://oggetto.ru")
                 }
             }
         }
