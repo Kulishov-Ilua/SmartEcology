@@ -23,6 +23,7 @@ import ru.kulishov.smartecology.data.SystemPrompt
 import ru.kulishov.smartecology.data.local.AppDatabase
 import ru.kulishov.smartecology.data.local.getRoomDatabase
 import ru.kulishov.smartecology.data.local.repository.SettingRepositoryImpl
+import ru.kulishov.smartecology.data.newPrompt
 import ru.kulishov.smartecology.data.personsExample
 import ru.kulishov.smartecology.data.questionListData
 import ru.kulishov.smartecology.data.remote.model.ChatCompletionResponse
@@ -350,7 +351,7 @@ fun setSetting(set: Setting){
                 "messages": [
                     {
                         "role": "system",
-                        "content": "${escapeForJson(SystemPrompt)}"
+                        "content": "${escapeForJson(newPrompt)}"
                     },
                     {
                         "role": "user",

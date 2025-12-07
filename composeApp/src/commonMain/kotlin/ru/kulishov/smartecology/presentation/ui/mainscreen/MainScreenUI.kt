@@ -208,6 +208,7 @@ fun MainScreenUI(
                                         ButtonCustom({
                                             textFieldViewModel.setReadOnly(false)
                                             viewModel.setState(MainScreenViewModel.UiState.Success)
+                                            viewModel.inputBlockViewModel.quizeViewModel.setState(0)
                                         }, text = "Спасибо",colors = ButtonDefaults.buttonColors().copy(contentColor = MaterialTheme.colorScheme.onSurface))
                                     }
 

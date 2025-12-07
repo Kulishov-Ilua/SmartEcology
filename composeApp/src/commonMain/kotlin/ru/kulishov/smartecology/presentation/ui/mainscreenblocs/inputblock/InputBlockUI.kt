@@ -84,7 +84,9 @@ fun InputBlockUI(viewModel: InputBlockViewModel){
                 }
             }else{
                 Box(modifier = Modifier.padding(start = 20.dp,end=20.dp)){
-                    QuizeUI(viewModel.quizeViewModel,{viewModel.onAnswer(it)})
+                    QuizeUI(viewModel.quizeViewModel,{
+                        viewModel.onAnswer(it)
+                    viewModel.setInputState(1)})
                 }
 
             }
