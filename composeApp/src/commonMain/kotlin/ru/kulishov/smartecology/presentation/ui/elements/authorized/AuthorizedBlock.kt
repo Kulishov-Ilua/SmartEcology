@@ -71,7 +71,7 @@ fun AuthorizedBlock(viewModel: AuthorizedBlockViewModel){
                     }, text = "Войти")
                 }
                 AuthorizedBlockViewModel.UiState.User ->{
-                    Text("Здравствуйте, ${viewModel.nameInp}!\nВведите пароль", style = MaterialTheme.typography.titleLarge)
+                    Text("Здравствуйте, ${viewModel.nameInp}!\nВведите пароль", style = MaterialTheme.typography.titleMedium)
                     Box(Modifier.width(200.dp), contentAlignment = Alignment.Center){
                         TextFieldCustom(password.value, onTextChange = {viewModel.setPassword(it)}, readOnly = false, placeholder = "Введите пароль",isError.value,true,false,3)
 
@@ -81,7 +81,7 @@ fun AuthorizedBlock(viewModel: AuthorizedBlockViewModel){
                     }, text = "Войти")
                 }
                 AuthorizedBlockViewModel.UiState.UserEmpty ->{
-                    Text("Здравствуйте!\nВведите имя", style = MaterialTheme.typography.titleLarge)
+                    Text("Здравствуйте!\nВведите имя", style = MaterialTheme.typography.titleMedium)
                     Box(Modifier.width(200.dp), contentAlignment = Alignment.Center){
                         TextFieldCustom(name.value, onTextChange = {viewModel.setName(it)}, readOnly = false, placeholder = "Введите имя",isError.value,false,false,3)
 
@@ -97,7 +97,7 @@ fun AuthorizedBlock(viewModel: AuthorizedBlockViewModel){
 
                 AuthorizedBlockViewModel.UiState.UserList -> {
                     Box(Modifier.padding(20.dp).height(400.dp).fillMaxSize(), contentAlignment = Alignment.Center){
-                        LazyColumn {
+                        LazyColumn(horizontalAlignment = Alignment.CenterHorizontally) {
                             item {
                                 ButtonCustom({
                                     viewModel.setState(AuthorizedBlockViewModel.UiState.UserEmpty)

@@ -19,14 +19,16 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.serialization.json.Json
-import ru.kulishov.smartecology.AI_BOT
 import ru.kulishov.smartecology.AI_MODEL
 import ru.kulishov.smartecology.BASE_URL
 import ru.kulishov.smartecology.data.SystemPrompt
+import ru.kulishov.smartecology.data.SystemPrompt2
 import ru.kulishov.smartecology.data.local.AppDatabase
 import ru.kulishov.smartecology.data.local.getRoomDatabase
 import ru.kulishov.smartecology.data.local.repository.SettingRepositoryImpl
 import ru.kulishov.smartecology.data.newPrompt
+import ru.kulishov.smartecology.data.newnewPrompt
+import ru.kulishov.smartecology.data.newnewPrompt2
 import ru.kulishov.smartecology.data.personsExample
 import ru.kulishov.smartecology.data.questionListData
 import ru.kulishov.smartecology.data.remote.model.ChatCompletionResponse
@@ -167,6 +169,10 @@ fun setSetting(set: Setting){
             imagePrompt(it)
         }, onAnswer = {
             modelAnswer=it
+            if(currentUser.value.id!=-1){
+                updatePeople(currentUser.value)
+            }
+            _currentUser.value= Person(-1,"",0,"",0,"")
             _uiState.value= UiState.Result
         })
 
@@ -350,17 +356,18 @@ fun setSetting(set: Setting){
             try {
                 val jsonBody = """
             {
-                "model": "ai/AI_MODEL",
+                "model": "ai/$AI_MODEL",
                 "messages": [
                     {
                         "role": "system",
-                        "content": "${escapeForJson(newPrompt)}"
+                        "content": "${escapeForJson(SystemPrompt)}"
                     },
                     {
                         "role": "user",
                         "content": "${escapeForJson(text)}"
                     }
-                ]
+                ],"max_tokens": 500,
+                "temperature": 0.1
             }
             """.trimIndent()
 
