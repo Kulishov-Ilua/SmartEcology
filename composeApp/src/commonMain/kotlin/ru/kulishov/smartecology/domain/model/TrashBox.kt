@@ -4,7 +4,7 @@ import androidx.compose.ui.graphics.Color
 
 data class TrashBox(
     val id:Int,
-    val name:Int,
+    val name: String,
     val rools: String,
     val icon: Int,
     val color: Triple<Int,Int,Int>,

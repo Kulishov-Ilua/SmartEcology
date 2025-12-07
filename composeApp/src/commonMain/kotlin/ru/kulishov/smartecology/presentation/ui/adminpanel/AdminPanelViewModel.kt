@@ -80,8 +80,8 @@ class AdminPanelViewModel(
     private val _boxes = MutableStateFlow<List<TrashBox>>(emptyList())
     val boxes: StateFlow<List<TrashBox>> = _boxes.asStateFlow()
 
-    fun setBoxes(state: List<String>){
-       // _activities.value=state
+    fun setBoxes(state: List<TrashBox>){
+       _boxes.value=state
     }
 
 

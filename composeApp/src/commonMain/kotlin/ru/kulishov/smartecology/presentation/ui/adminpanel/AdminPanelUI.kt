@@ -28,9 +28,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.painterResource
 import ru.kulishov.smartecology.domain.model.Setting
+import ru.kulishov.smartecology.domain.model.TrashBox
 import ru.kulishov.smartecology.presentation.ui.elements.ButtonCustom
 import ru.kulishov.smartecology.presentation.ui.elements.SettingCards
 import ru.kulishov.smartecology.presentation.ui.elements.TextFieldCustom
+import ru.kulishov.smartecology.presentation.ui.elements.TrashBox
 import ru.kulishov.smartecology.presentation.ui.elements.authorized.AuthorizedBlock
 import smartecology.composeapp.generated.resources.Res
 import smartecology.composeapp.generated.resources.trash
@@ -65,7 +67,7 @@ fun AdminPanel(
         AdminPanelViewModel.UiState.Success -> {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
                 LazyColumn(horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.width(700.dp),
+                    modifier = Modifier.padding(100.dp).width(700.dp),
                     verticalArrangement = Arrangement.spacedBy(15.dp)) {
                     item {
                         SettingCards("Камера",cameraState.value,{viewModel.setCamera(it)})
@@ -171,6 +173,148 @@ fun AdminPanel(
                                 }
                             }
                         }
+                    }
+                    item {
+                        Box(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.background,
+                            RoundedCornerShape(10)
+                        ), contentAlignment = Alignment.Center) {
+                            Column(
+                                Modifier.padding(
+                                    start = 20.dp,
+                                    end = 20.dp,
+                                    top = 10.dp,
+                                    bottom = 10.dp
+                                ),
+                                verticalArrangement = Arrangement.spacedBy(15.dp)
+                            ) {
+                                Text("WebView", style = MaterialTheme.typography.bodyLarge)
+                                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                                    Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                                        for (x in boxes.value) {
+                                            Row(
+                                                horizontalArrangement = Arrangement.spacedBy(5.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Box(Modifier.weight(2f)) {
+                                                    TextFieldCustom(
+                                                        x.name,
+                                                        onTextChange = {},
+                                                        readOnly = true,
+                                                        placeholder = "Введите имя",
+                                                        false,
+                                                        false,
+                                                        false,
+                                                        3
+                                                    )
+                                                }
+
+
+                                                Box(Modifier.weight(1f)) {
+                                                    Icon(
+                                                        painter = painterResource(Res.drawable.trash),
+                                                        contentDescription = "Trash",
+                                                        tint = MaterialTheme.colorScheme.onBackground,
+                                                        modifier = Modifier.clickable {
+                                                            viewModel.setBoxes(boxes.value - x)
+                                                        })
+                                                }
+                                            }
+                                        }
+                                        var newName by remember { mutableStateOf("") }
+                                        var description by remember { mutableStateOf("") }
+                                        var color by remember { mutableStateOf(Triple<Int,Int, Int>(0,0,0)) }
+
+                                        TextFieldCustom(
+                                            newName,
+                                            onTextChange = { newName = it },
+                                            readOnly = false,
+                                            placeholder = "Введите Название",
+                                            false,
+                                            false,
+                                            false,
+                                            3
+                                        )
+                                        TextFieldCustom(
+                                            description,
+                                            onTextChange = { description = it },
+                                            readOnly = false,
+                                            placeholder = "Введите описание",
+                                            false,
+                                            false,
+                                            false,
+                                            3
+                                        )
+                                        Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                                            var error1 by remember { mutableStateOf(false) }
+                                            Box(Modifier.weight(1f)) {
+                                                TextFieldCustom(
+                                                    color.first.toString(),
+                                                    onTextChange = {it->
+                                                        val nInt = it.toIntOrNull()
+                                                        if(nInt==null){
+                                                            error1=true
+                                                        }else{
+                                                            color=Triple(nInt.coerceIn(0,255),color.second,color.third)
+                                                        }
+                                                    },
+                                                    readOnly = false,
+                                                    placeholder = "Введите red",
+                                                    error1,
+                                                    false,
+                                                    false,
+                                                    3
+                                                )
+                                            }
+                                            var error2 by remember { mutableStateOf(false) }
+                                            Box(Modifier.weight(1f)) {
+                                                TextFieldCustom(
+                                                    color.second.toString(),
+                                                    onTextChange = {it->
+                                                        val nInt = it.toIntOrNull()
+                                                        if(nInt==null){
+                                                            error2=true
+                                                        }else{
+                                                            color=Triple(color.first,nInt.coerceIn(0,255),color.third)
+                                                        }
+                                                    },
+                                                    readOnly = false,
+                                                    placeholder = "Введите green",
+                                                    error2,
+                                                    false,
+                                                    false,
+                                                    3
+                                                )
+                                            }
+                                            var error3 by remember { mutableStateOf(false) }
+                                            Box(Modifier.weight(1f)) {
+                                                TextFieldCustom(
+                                                    color.third.toString(),
+                                                    onTextChange = {it->
+                                                        val nInt = it.toIntOrNull()
+                                                        if(nInt==null){
+                                                            error3=true
+                                                        }else{
+                                                            color=Triple(color.first,color.second,nInt.coerceIn(0,255))
+                                                        }
+                                                    },
+                                                    readOnly = false,
+                                                    placeholder = "Введите blue",
+                                                    error1,
+                                                    false,
+                                                    false,
+                                                    3
+                                                )
+                                            }
+                                        }
+                                        ButtonCustom({
+                                            viewModel.setBoxes(boxes.value + TrashBox(0,newName,description, 0, color,0) )
+                                        },text = "Добавить")
+                                    }
+                                }
+                            }
+                        }
+
+
                     }
 
 
