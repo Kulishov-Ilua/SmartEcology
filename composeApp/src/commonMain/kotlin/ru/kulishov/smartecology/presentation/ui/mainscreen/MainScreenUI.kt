@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -30,6 +32,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.painterResource
 import ru.kulishov.smartecology.presentation.ui.adminpanel.AdminPanel
+import ru.kulishov.smartecology.presentation.ui.adminpanel.AdminPanelViewModel
 import ru.kulishov.smartecology.presentation.ui.camera.CameraBlock
 import ru.kulishov.smartecology.presentation.ui.camera.CameraView
 import ru.kulishov.smartecology.presentation.ui.elements.ButtonCustom
@@ -54,6 +57,7 @@ import smartecology.composeapp.generated.resources.exit
 import smartecology.composeapp.generated.resources.manual
 import smartecology.composeapp.generated.resources.menu
 import smartecology.composeapp.generated.resources.plastic
+import smartecology.composeapp.generated.resources.trash
 
 @Composable
 fun MainScreenUI(
@@ -204,6 +208,7 @@ fun MainScreenUI(
                                         ButtonCustom({
                                             textFieldViewModel.setReadOnly(false)
                                             viewModel.setState(MainScreenViewModel.UiState.Success)
+                                            viewModel.inputBlockViewModel.quizeViewModel.setState(0)
                                         }, text = "Спасибо",colors = ButtonDefaults.buttonColors().copy(contentColor = MaterialTheme.colorScheme.onSurface))
                                     }
 
@@ -216,14 +221,20 @@ fun MainScreenUI(
 
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter){
                     MagicBottomIsland(1,listOf(0,300), onChange = {},{
-                        Row(horizontalArrangement = Arrangement.spacedBy(50.dp)) {
-                            TrashBox(state = if (viewModel.modelAnswer.contains("пластик")||viewModel.modelAnswer.contains("Пластик")||viewModel.modelAnswer.contains("**пластик**")) true else false,Res.drawable.plastic,"Пластик",Color.Yellow)
-                            TrashBox(state = if (viewModel.modelAnswer.contains("стекло")||viewModel.modelAnswer.contains("Стекло")||viewModel.modelAnswer.contains("**стекло**")) true else false,Res.drawable.plastic,"Стекло",Color(21,0,255))
-                            TrashBox(state = if (viewModel.modelAnswer.contains("буиага")||viewModel.modelAnswer.contains("Бумага")||viewModel.modelAnswer.contains("**бумага**")) true else false,Res.drawable.plastic,"Бумага",Color(8,154,0))
-                            TrashBox(state = if (viewModel.modelAnswer.contains("другое")||viewModel.modelAnswer.contains("Другое")||viewModel.modelAnswer.contains("**другое**")) true else false,Res.drawable.plastic,"Другое",Color(204,81,39))
-
-
+                        LazyRow(horizontalArrangement = Arrangement.spacedBy(50.dp)) {
+                            items(viewModel.settings.value.boxes){ box->
+                                TrashBox(state = viewModel.modelAnswer.contains(box.name),Res.drawable.trash,box.name,
+                                    Color(box.color.first,box.color.second,box.color.third) )
+                            }
                         }
+//                        Row() {
+//                            TrashBox(state = if (viewModel.modelAnswer.contains("пластик")||viewModel.modelAnswer.contains("Пластик")||viewModel.modelAnswer.contains("**пластик**")) true else false,Res.drawable.plastic,"Пластик",Color.Yellow)
+//                            TrashBox(state = if (viewModel.modelAnswer.contains("стекло")||viewModel.modelAnswer.contains("Стекло")||viewModel.modelAnswer.contains("**стекло**")) true else false,Res.drawable.plastic,"Стекло",Color(21,0,255))
+//                            TrashBox(state = if (viewModel.modelAnswer.contains("буиага")||viewModel.modelAnswer.contains("Бумага")||viewModel.modelAnswer.contains("**бумага**")) true else false,Res.drawable.plastic,"Бумага",Color(8,154,0))
+//                            TrashBox(state = if (viewModel.modelAnswer.contains("другое")||viewModel.modelAnswer.contains("Другое")||viewModel.modelAnswer.contains("**другое**")) true else false,Res.drawable.plastic,"Другое",Color(204,81,39))
+//
+//
+//                        }
                     })
                 }
 
@@ -260,6 +271,7 @@ fun MainScreenUI(
                                 tint = MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier.clickable {
                                     viewModel.setState(MainScreenViewModel.UiState.Success)
+                                    viewModel.adminPanelViewModel.setState(AdminPanelViewModel.UiState.UnAuthorized)
                                 })
 
                         }

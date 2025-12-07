@@ -123,6 +123,9 @@ class AdminPanelViewModel(
 
     private val _uiState = MutableStateFlow<UiState>(UiState.Success)
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+    fun setState(state: UiState){
+        _uiState.value=state
+    }
 
     private val _password = MutableStateFlow<String>("")
     val password: StateFlow<String> = _password.asStateFlow()
