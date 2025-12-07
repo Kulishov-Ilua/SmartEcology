@@ -85,6 +85,86 @@ fun AdminPanel(
                         SettingCards("Факты",factState.value,{viewModel.setFactState(it)} )
                     }
                     item {
+                        if(factState.value) {
+                            Box(
+                                Modifier.fillMaxWidth().background(
+                                    MaterialTheme.colorScheme.background,
+                                    RoundedCornerShape(10)
+                                ), contentAlignment = Alignment.Center
+                            ) {
+                                Column(
+                                    Modifier.padding(
+                                        start = 20.dp,
+                                        end = 20.dp,
+                                        top = 10.dp,
+                                        bottom = 10.dp
+                                    ),
+                                    verticalArrangement = Arrangement.spacedBy(15.dp)
+                                ) {
+                                    Text("Факты", style = MaterialTheme.typography.bodyLarge)
+                                    Box(
+                                        Modifier.fillMaxWidth(),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                                            for (x in facts.value) {
+                                                Row(
+                                                    horizontalArrangement = Arrangement.spacedBy(5.dp),
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    Box(Modifier.weight(2f)) {
+                                                        TextFieldCustom(
+                                                            x,
+                                                            onTextChange = {},
+                                                            readOnly = true,
+                                                            placeholder = "Введите факт",
+                                                            false,
+                                                            false,
+                                                            false,
+                                                            3
+                                                        )
+                                                    }
+
+
+                                                    Box(Modifier.weight(1f)) {
+                                                        Icon(
+                                                            painter = painterResource(Res.drawable.trash),
+                                                            contentDescription = "Trash",
+                                                            tint = MaterialTheme.colorScheme.onBackground,
+                                                            modifier = Modifier.clickable {
+                                                                viewModel.setFacts(facts.value - x)
+                                                            })
+                                                    }
+                                                }
+                                            }
+                                            Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                                                var newName by remember { mutableStateOf("") }
+                                                Box(Modifier.weight(2f)) {
+                                                    TextFieldCustom(
+                                                        newName,
+                                                        onTextChange = { newName = it },
+                                                        readOnly = false,
+                                                        placeholder = "Введите факт",
+                                                        false,
+                                                        false,
+                                                        false,
+                                                        3
+                                                    )
+                                                }
+
+                                                Box(Modifier.weight(1f)) {
+                                                    ButtonCustom({
+                                                        viewModel.setFacts(facts.value+newName)
+                                                    }, text = "Добавить")
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    item {
                         SettingCards("Квиз игра",quizeGameState.value,{viewModel.setQuizeGameState(it)} )
                     }
                     item {
@@ -97,9 +177,10 @@ fun AdminPanel(
                                 Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center){
                                     Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
                                         for(x in activities.value){
-                                            Row(horizontalArrangement = Arrangement.spacedBy(5.dp),
-                                                verticalAlignment = Alignment.CenterVertically) {
-                                                Box(Modifier.weight(2f)) {
+                                            if(x.contains("$$")){
+                                                Row(horizontalArrangement = Arrangement.spacedBy(5.dp),
+                                                    verticalAlignment = Alignment.CenterVertically) {
+                                                    Box(Modifier.weight(2f)) {
                                                         TextFieldCustom(
                                                             x.split("$$")[0],
                                                             onTextChange = {},
@@ -111,30 +192,32 @@ fun AdminPanel(
                                                             3
                                                         )
 
-                                                }
-                                                Box(Modifier.weight(2f)) {
-                                                    TextFieldCustom(
-                                                        x.split("$$")[1],
-                                                        onTextChange = {},
-                                                        readOnly = true,
-                                                        placeholder = "Введите имя",
-                                                        false,
-                                                        false,
-                                                        false,
-                                                        3
-                                                    )
-                                                }
-                                                Box(Modifier.weight(1f)) {
-                                                    Icon(
-                                                        painter = painterResource(Res.drawable.trash),
-                                                        contentDescription = "Trash",
-                                                        tint = MaterialTheme.colorScheme.onBackground,
-                                                        modifier = Modifier.clickable {
-                                                            viewModel.setActivities(activities.value - x)
-                                                        })
+                                                    }
+                                                    Box(Modifier.weight(2f)) {
+                                                        TextFieldCustom(
+                                                            x.split("$$")[1],
+                                                            onTextChange = {},
+                                                            readOnly = true,
+                                                            placeholder = "Введите имя",
+                                                            false,
+                                                            false,
+                                                            false,
+                                                            3
+                                                        )
+                                                    }
+                                                    Box(Modifier.weight(1f)) {
+                                                        Icon(
+                                                            painter = painterResource(Res.drawable.trash),
+                                                            contentDescription = "Trash",
+                                                            tint = MaterialTheme.colorScheme.onBackground,
+                                                            modifier = Modifier.clickable {
+                                                                viewModel.setActivities(activities.value - x)
+                                                            })
+                                                    }
                                                 }
                                             }
-                                        }
+                                            }
+
                                         Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
                                             var newName by remember { mutableStateOf("") }
                                             var newAddress by remember { mutableStateOf("") }
@@ -187,7 +270,7 @@ fun AdminPanel(
                                 ),
                                 verticalArrangement = Arrangement.spacedBy(15.dp)
                             ) {
-                                Text("WebView", style = MaterialTheme.typography.bodyLarge)
+                                Text("Контейнеры", style = MaterialTheme.typography.bodyLarge)
                                 Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                                     Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
                                         for (x in boxes.value) {

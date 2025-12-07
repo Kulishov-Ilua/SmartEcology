@@ -96,8 +96,9 @@ class AdminPanelViewModel(
 
     private val _facts = MutableStateFlow<List<String>>(emptyList())
     val facts: StateFlow<List<String>> = _facts.asStateFlow()
-
-
+    fun setFacts(facts: List<String>){
+        _facts.value=facts
+    }
 
     private val _startQuize = MutableStateFlow<List<StartQuize>>(emptyList())
     val startQuize: StateFlow<List<StartQuize>> = _startQuize.asStateFlow()
