@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.painterResource
 import ru.kulishov.smartecology.presentation.ui.adminpanel.AdminPanel
+import ru.kulishov.smartecology.presentation.ui.adminpanel.AdminPanelViewModel
 import ru.kulishov.smartecology.presentation.ui.camera.CameraBlock
 import ru.kulishov.smartecology.presentation.ui.camera.CameraView
 import ru.kulishov.smartecology.presentation.ui.elements.ButtonCustom
@@ -269,6 +270,7 @@ fun MainScreenUI(
                                 tint = MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier.clickable {
                                     viewModel.setState(MainScreenViewModel.UiState.Success)
+                                    viewModel.adminPanelViewModel.setState(AdminPanelViewModel.UiState.UnAuthorized)
                                 })
 
                         }

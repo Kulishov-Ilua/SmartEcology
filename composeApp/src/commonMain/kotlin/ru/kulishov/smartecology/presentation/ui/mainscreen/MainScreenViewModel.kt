@@ -283,7 +283,7 @@ fun setSetting(set: Setting){
                             "content": [
                                 {
                                     "type": "text",
-                                    "text": "Что находится на фотогрфии"
+                                    "text": "Что находится на фотогрфии, и из чего состоит"
                                 },
                                 {
                                     "type": "image_url",

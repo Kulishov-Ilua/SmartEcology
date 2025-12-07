@@ -56,6 +56,8 @@ class AuthorizedBlockViewModel ( val nameInp:String,val onGood:()-> Unit,
         }else{
             _isError.value=true
         }
+        _password.value=""
+        _secondPassword.value=""
     }
 
     fun checkUser(){
@@ -64,6 +66,7 @@ class AuthorizedBlockViewModel ( val nameInp:String,val onGood:()-> Unit,
         }else{
             _isError.value=true
         }
+        _name.value=""
     }
 
     fun setName(state:String){
@@ -74,8 +77,9 @@ class AuthorizedBlockViewModel ( val nameInp:String,val onGood:()-> Unit,
             onGood()
         }else{
             _isError.value=true
-            _password.value=""
+
         }
+        _password.value=""
     }
 
     fun setState(state: UiState){
