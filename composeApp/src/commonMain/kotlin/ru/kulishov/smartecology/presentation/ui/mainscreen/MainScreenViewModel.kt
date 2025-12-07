@@ -23,8 +23,10 @@ import ru.kulishov.smartecology.data.SystemPrompt
 import ru.kulishov.smartecology.data.local.AppDatabase
 import ru.kulishov.smartecology.data.local.getRoomDatabase
 import ru.kulishov.smartecology.data.local.repository.SettingRepositoryImpl
+import ru.kulishov.smartecology.data.personsExample
 import ru.kulishov.smartecology.data.questionListData
 import ru.kulishov.smartecology.data.remote.model.ChatCompletionResponse
+import ru.kulishov.smartecology.data.settingExample
 import ru.kulishov.smartecology.domain.model.Person
 import ru.kulishov.smartecology.domain.model.QuizeGame
 import ru.kulishov.smartecology.domain.model.Setting
@@ -32,6 +34,7 @@ import ru.kulishov.smartecology.domain.model.StartQuize
 import ru.kulishov.smartecology.domain.model.TrashBox
 import ru.kulishov.smartecology.domain.usecase.person.AddPersonUseCase
 import ru.kulishov.smartecology.domain.usecase.person.GetPersonUseCase
+import ru.kulishov.smartecology.domain.usecase.person.SetPersonUseCase
 import ru.kulishov.smartecology.domain.usecase.settings.GetSettingsUseCase
 import ru.kulishov.smartecology.domain.usecase.settings.InsertSettingUseCase
 import ru.kulishov.smartecology.domain.usecase.settings.SetSettingsUseCase
@@ -47,7 +50,9 @@ class MainScreenViewModel(
     private val insertSettingsUseCase: InsertSettingUseCase,
     private val setSettingsUseCase: SetSettingsUseCase,
     private val addPersonUseCase: AddPersonUseCase,
-    private val getPersonUseCase: GetPersonUseCase
+    private val getPersonUseCase: GetPersonUseCase,
+    private val setPersonUseCase: SetPersonUseCase,
+    insertAddPersonUseCase: AddPersonUseCase
 ) : BaseViewModel() {
     val client = HttpClient(CIO) {
         install(ContentNegotiation) {
@@ -93,7 +98,7 @@ class MainScreenViewModel(
     private val _currentUser = MutableStateFlow<Person>(Person(-1,",",0,"",0,""))
     val currentUser: StateFlow<Person> = _currentUser.asStateFlow()
 
-    private val _users = MutableStateFlow<List<Person>>(emptyList())
+    private val _users = MutableStateFlow<List<Person>>(personsExample)
     val users: StateFlow<List<Person>> = _users.asStateFlow()
 
 
@@ -144,6 +149,13 @@ fun setSetting(set: Setting){
         setSettingsUseCase(settings.value)
     }
 }
+
+    fun updatePeople(person:Person){
+        launch {
+            setPersonUseCase(person.copy(score = person.score+1))
+        }
+
+    }
     val inputBlockViewModel = InputBlockViewModel(
         onTextPrompt = {
             textRequest(it)
@@ -169,7 +181,9 @@ fun setSetting(set: Setting){
             }.collect { set ->
 
                 if(set.isEmpty()){
-                    insertSettingsUseCase(Setting(0,"",true,true,true,true,true,true,true,emptyList(),emptyList(),emptyList(),emptyList(),listOf("Факты", "Лидерборд"),emptyList()))
+                    //insertSettingsUseCase(Setting(0,"",true,true,true,true,true,true,true,emptyList(),emptyList(),emptyList(),emptyList(),listOf("Факты", "Лидерборд"),emptyList()))
+                    insertSettingsUseCase(settingExample)
+
                 }
 
                 _settings.value=set[0]
@@ -183,11 +197,11 @@ fun setSetting(set: Setting){
                     settings.value.quizeState
                 )
                 contentBlockViewModel.setData(
-                    settings.value.activities,
+                    activities = settings.value.activities,
                     factAccept = settings.value.factsState,
                     topAccept = settings.value.topListState,
                     quizeAccept = settings.value.quizeGameState,
-                    quizeGame = settings.value.quizeGame
+                    quizeGame = settings.value.quizeGame,
                 )
                 adminPanelViewModel.setPassword(settings.value.password)
                 adminPanelViewModel.setData(
@@ -215,7 +229,7 @@ fun setSetting(set: Setting){
             }.collect { set ->
                 _users.value=set
                 usersViewModel.setUsers(users.value)
-
+                contentBlockViewModel.setPerson(users.value)
                 usersViewModel.setState(AuthorizedBlockViewModel.UiState.UserList)
             }
         }
@@ -367,6 +381,10 @@ fun setSetting(set: Setting){
                 println("Status: ${parsedResponse.id}")
                 println("Response: ${parsedResponse.choices[0].message}")
                 modelAnswer=parsedResponse.choices[0].message.content
+                if(currentUser.value.id!=-1){
+                    updatePeople(currentUser.value)
+                }
+                _currentUser.value= Person(-1,"",0,"",0,"")
                 _uiState.value= UiState.Result
             }catch (e: Exception){
                 println(e)

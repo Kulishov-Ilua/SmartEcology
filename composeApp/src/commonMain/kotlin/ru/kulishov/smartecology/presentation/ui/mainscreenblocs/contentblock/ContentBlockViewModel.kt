@@ -3,6 +3,7 @@ package ru.kulishov.smartecology.presentation.ui.mainscreenblocs.contentblock
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import ru.kulishov.smartecology.domain.model.Person
 import ru.kulishov.smartecology.domain.model.QuizeGame
 import ru.kulishov.smartecology.presentation.ui.camera.BaseViewModel
 import ru.kulishov.smartecology.presentation.ui.mainscreenblocs.inputblock.InputBlockViewModel
@@ -12,7 +13,7 @@ class ContentBlockViewModel(
 ): BaseViewModel() {
     private val _uiState = MutableStateFlow<InputBlockViewModel.UiState>(InputBlockViewModel.UiState.Success)
     val uiState: StateFlow<InputBlockViewModel.UiState> = _uiState.asStateFlow()
-    private val _activities = MutableStateFlow<List<String>>(listOf("Факты", "Лидерборд"))
+    private val _activities = MutableStateFlow<List<String>>(emptyList())
     val activities: StateFlow<List<String>> = _activities.asStateFlow()
 
     private val _infoState = MutableStateFlow<String>("Факты")
@@ -33,6 +34,11 @@ class ContentBlockViewModel(
     val quizeGame: StateFlow<List<QuizeGame>> = _quizeGame.asStateFlow()
 
 
+    private val _persons = MutableStateFlow<List<Person>>(emptyList())
+    val person: StateFlow<List<Person>> = _persons.asStateFlow()
+
+
+
     fun setInfoBlock(state: String) {
         _infoState.value = state
     }
@@ -42,6 +48,10 @@ class ContentBlockViewModel(
         _topListState.value=topAccept
         _quizeGameState.value=quizeAccept
         _quizeGame.value=quizeGame
+    }
+
+    fun setPerson(person: List<Person>){
+        _persons.value=person
     }
 
 

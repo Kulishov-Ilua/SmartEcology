@@ -5,14 +5,17 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ru.kulishov.smartecology.presentation.ui.elements.SwitcherCustom
+import ru.kulishov.smartecology.presentation.ui.elements.WebPreview
 import ru.kulishov.smartecology.presentation.ui.elements.factlist.FactListUI
 import ru.kulishov.smartecology.presentation.ui.elements.factlist.FactListViewModel
+import ru.kulishov.smartecology.presentation.ui.elements.toplist.TopScreen
 
 @Composable
 fun ContentBlockUI(
@@ -23,6 +26,8 @@ fun ContentBlockUI(
     val factAccept = viewModel.factAccept.collectAsState()
     val topAccept = viewModel.topListState.collectAsState()
     val quizeAccept = viewModel.quizeGameState.collectAsState()
+    val person = viewModel.person.collectAsState()
+
     Box(
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.Center
@@ -37,7 +42,7 @@ fun ContentBlockUI(
             if(factAccept.value) createdList+="Факты"
             if(quizeAccept.value) createdList+="Квиз"
             SwitcherCustom(
-                createdList + activities.value,
+                createdList + "Oggetto",
                 infoState.value,
                 { viewModel.setInfoBlock(it)})
             when(infoState.value){
@@ -46,10 +51,10 @@ fun ContentBlockUI(
                     FactListUI(factListViewModel)
                 }
                 "Лидерборд" ->{
-
+                    TopScreen(person.value)
                 }
                 else ->{
-
+                    WebPreview("https://oggetto.ru/")
                 }
             }
         }

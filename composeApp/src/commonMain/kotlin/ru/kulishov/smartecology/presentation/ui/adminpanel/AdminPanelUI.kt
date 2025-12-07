@@ -112,7 +112,7 @@ fun AdminPanel(
                                                     horizontalArrangement = Arrangement.spacedBy(5.dp),
                                                     verticalAlignment = Alignment.CenterVertically
                                                 ) {
-                                                    Box(Modifier.weight(2f)) {
+                                                    Box(Modifier.weight(4f)) {
                                                         TextFieldCustom(
                                                             x,
                                                             onTextChange = {},
@@ -177,12 +177,12 @@ fun AdminPanel(
                                 Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center){
                                     Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
                                         for(x in activities.value){
-                                            if(x.contains("$$")){
+                                            if(x.contains("%%")){
                                                 Row(horizontalArrangement = Arrangement.spacedBy(5.dp),
                                                     verticalAlignment = Alignment.CenterVertically) {
                                                     Box(Modifier.weight(2f)) {
                                                         TextFieldCustom(
-                                                            x.split("$$")[0],
+                                                            x.split("%%")[0],
                                                             onTextChange = {},
                                                             readOnly = true,
                                                             placeholder = "Введите имя",
@@ -195,7 +195,7 @@ fun AdminPanel(
                                                     }
                                                     Box(Modifier.weight(2f)) {
                                                         TextFieldCustom(
-                                                            x.split("$$")[1],
+                                                            x.split("%%")[1],
                                                             onTextChange = {},
                                                             readOnly = true,
                                                             placeholder = "Введите имя",
@@ -247,7 +247,7 @@ fun AdminPanel(
                                             }
                                             Box(Modifier.weight(1f)) {
                                                 ButtonCustom({
-                                                    viewModel.setActivities(activities.value + "$newName$$$newAddress")
+                                                    viewModel.setActivities(activities.value + "$newName%%$newAddress")
                                                 }, text = "Добавить")
                                             }
                                         }
