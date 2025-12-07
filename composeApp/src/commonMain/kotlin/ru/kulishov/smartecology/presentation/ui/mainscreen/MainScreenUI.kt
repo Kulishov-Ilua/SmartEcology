@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.painterResource
+import ru.kulishov.smartecology.presentation.ui.adminpanel.AdminPanel
 import ru.kulishov.smartecology.presentation.ui.camera.CameraBlock
 import ru.kulishov.smartecology.presentation.ui.camera.CameraView
 import ru.kulishov.smartecology.presentation.ui.elements.ButtonCustom
@@ -38,12 +39,16 @@ import ru.kulishov.smartecology.presentation.ui.elements.SwitcherCustom
 import ru.kulishov.smartecology.presentation.ui.elements.TextFieldCustom
 import ru.kulishov.smartecology.presentation.ui.elements.TrashBox
 import ru.kulishov.smartecology.presentation.ui.elements.WebPreview
+import ru.kulishov.smartecology.presentation.ui.elements.authorized.AuthorizedBlock
+import ru.kulishov.smartecology.presentation.ui.elements.authorized.AuthorizedBlockViewModel
 import ru.kulishov.smartecology.presentation.ui.elements.chatbot.ChatBotUI
 import ru.kulishov.smartecology.presentation.ui.elements.chatbot.ChatBotViewModel
 import ru.kulishov.smartecology.presentation.ui.elements.factlist.FactListUI
 import ru.kulishov.smartecology.presentation.ui.elements.factlist.FactListViewModel
 import ru.kulishov.smartecology.presentation.ui.elements.quize.QuizeUI
 import ru.kulishov.smartecology.presentation.ui.elements.quize.QuizeViewModel
+import ru.kulishov.smartecology.presentation.ui.mainscreenblocs.contentblock.ContentBlockUI
+import ru.kulishov.smartecology.presentation.ui.mainscreenblocs.inputblock.InputBlockUI
 import smartecology.composeapp.generated.resources.Res
 import smartecology.composeapp.generated.resources.exit
 import smartecology.composeapp.generated.resources.manual
@@ -58,12 +63,11 @@ fun MainScreenUI(
     viewModel.setOrientation(orientation)
     val orientation = viewModel.orientation.collectAsState()
     val uiState = viewModel.uiState.collectAsState()
-    val infoState = viewModel.infoState.collectAsState()
-    val inputState = viewModel.inputState.collectAsState()
-    val activities = viewModel.activities.collectAsState()
+
+    val personListState = viewModel.personListState.collectAsState()
+
     val textFieldViewModel= ChatBotViewModel()
-    var shot by remember { mutableStateOf(false) }
-    val quizeViewModel= QuizeViewModel()
+
     val currentAdress by remember { mutableStateOf("https://docs.google.com/presentation/d/1I2EqD1QuewortwVOdxqe-B00m-MiP6pFJn21GD0_iBc/mobilepresent?slide=id.gc6f972163_0_19") }
 
     Box(Modifier.padding(top = 25.dp).fillMaxSize()) {
@@ -86,6 +90,12 @@ fun MainScreenUI(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(15.dp)
                         ) {
+                            ButtonCustom(
+                                onClick = {
+                                    viewModel.setPersonListState()
+                                }, text = if(viewModel.currentUser.value.id!=-1) viewModel.currentUser.value.name
+                                else "Войти"
+                            )
                             Icon(
                                 painter = painterResource(Res.drawable.manual),
                                 contentDescription = "Manual",
@@ -98,7 +108,7 @@ fun MainScreenUI(
                                 contentDescription = "Menu",
                                 tint = MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier.clickable {
-
+                                    viewModel.setState(MainScreenViewModel.UiState.AdminPanel)
                                 })
 
                         }
@@ -114,99 +124,18 @@ fun MainScreenUI(
                                     horizontalArrangement = Arrangement.spacedBy(20.dp),
                                     modifier = Modifier.padding(start = 20.dp, end = 20.dp)
                                 ) {
-
-                                        Box(
-                                            modifier = Modifier.fillMaxWidth(0.5f),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Column(
-                                                modifier = Modifier.fillMaxSize(),
-                                                horizontalAlignment = Alignment.CenterHorizontally,
-                                                verticalArrangement = Arrangement.spacedBy(50.dp)
-                                            ) {
-                                                SwitcherCustom(
-                                                    listOf("Картинка", "Текст", "Квиз"),
-                                                    if (inputState.value==0) "Картинка" else if (inputState.value==1)"Текст" else "Квиз",
-                                                    { it-> viewModel.setInputState(
-                                                        when(it){
-                                                            "Картинка" ->{
-                                                                0
-                                                            }
-                                                            "Текст" -> {
-                                                                1
-                                                            }
-                                                            else ->{
-                                                                2
-                                                            }
-                                                        } )})
-                                                if(inputState.value==0){
-                                                    CameraBox(400, { CameraBlock({viewModel.imagePrompt(it)
-                                                                                 shot=false
-                                                                                 },shot) })
-                                                }else if(inputState.value==1){
-
-                                                    Box(){
-                                                        Column(horizontalAlignment = Alignment.CenterHorizontally,
-                                                            verticalArrangement = Arrangement.spacedBy(50.dp)) {
-                                                            Text("Расскажите, что вы хотите выбросить", style = MaterialTheme.typography.titleLarge)
-                                                            Box(modifier = Modifier.fillMaxWidth()){
-                                                                ChatBotUI(textFieldViewModel,"Опишите подробно, что предстоит выбросить")
-                                                            }
-
-                                                        }
-                                                    }
-                                                }else{
-                                                    Box(modifier = Modifier.padding(start = 20.dp,end=20.dp)){
-                                                        QuizeUI(quizeViewModel,{viewModel.modelAnswer=it
-                                                            viewModel.setState(MainScreenViewModel.UiState.Result)})
-                                                    }
-
-                                                }
-
-
-                                                ButtonCustom({
-                                                    if(inputState.value==0){
-                                                        shot=true
-                                                    }else{
-                                                        viewModel.textRequest(textFieldViewModel.input.value)
-                                                    }
-                                                }, text = "Как быть с мусором", colors = ButtonDefaults.buttonColors().copy(contentColor = MaterialTheme.colorScheme.onSurface))
-                                            }
-                                        }
-                                        Box(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Column(
-                                                modifier = Modifier.fillMaxSize(),
-                                                horizontalAlignment = Alignment.CenterHorizontally,
-                                                verticalArrangement = Arrangement.spacedBy(50.dp)
-                                            ) {
-                                                SwitcherCustom(
-                                                    activities.value,
-                                                    infoState.value,
-                                                    { viewModel.setInfoBlock(it)})
-                                                when(infoState.value){
-                                                    "Факты" ->{
-                                                        val factListViewModel = FactListViewModel()
-                                                        FactListUI(factListViewModel)
-                                                    }
-                                                    "Лидерборд" ->{
-
-                                                    }
-                                                    else ->{
-
-                                                    }
-                                                }
-                                            }
-                                        }
-
-
+                                    InputBlockUI(viewModel.inputBlockViewModel)
+                                    ContentBlockUI(viewModel.contentBlockViewModel)
                                 }
                             }
 
                             false -> {
+                                Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(50.dp)) {
+                                    InputBlockUI(viewModel.inputBlockViewModel)
+                                    ContentBlockUI(viewModel.contentBlockViewModel)
 
+                                }
                             }
                         }
                     }
@@ -214,6 +143,12 @@ fun MainScreenUI(
 
                 }
 
+                if(personListState.value){
+                    Box(Modifier.padding(end = 20.dp).fillMaxSize(), contentAlignment = Alignment.TopEnd){
+                        viewModel.usersViewModel.setState(AuthorizedBlockViewModel.UiState.UserList)
+                        AuthorizedBlock(viewModel.usersViewModel)
+                    }
+                }
 
             }
 
@@ -232,7 +167,7 @@ fun MainScreenUI(
                             Row(horizontalArrangement = Arrangement.spacedBy(15.dp)) {
                                 ButtonCustom({
                                     textFieldViewModel.setReadOnly(false)
-                                    viewModel.setInputState(1)
+                                    viewModel.inputBlockViewModel.setInputState(1)
                                     viewModel.setState(MainScreenViewModel.UiState.Success)
                                 }, text = "Не верно",
                                     colors = ButtonDefaults.buttonColors(
@@ -310,6 +245,27 @@ fun MainScreenUI(
                     }
                 }
 
+            }
+
+            MainScreenViewModel.UiState.AdminPanel -> {
+                Column {
+                    Box(Modifier.padding(start = 20.dp, end = 20.dp).fillMaxWidth(), contentAlignment = Alignment.TopEnd) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(15.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(Res.drawable.exit),
+                                contentDescription = "Menu",
+                                tint = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.clickable {
+                                    viewModel.setState(MainScreenViewModel.UiState.Success)
+                                })
+
+                        }
+                    }
+                }
+                AdminPanel(viewModel.adminPanelViewModel)
             }
         }
 
