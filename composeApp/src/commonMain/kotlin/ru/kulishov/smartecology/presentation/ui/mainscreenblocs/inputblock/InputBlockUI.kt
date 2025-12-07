@@ -32,6 +32,16 @@ fun InputBlockUI(viewModel: InputBlockViewModel){
     val inputState = viewModel.inputState.collectAsState()
     var shot by remember { mutableStateOf(false) }
 
+    val cameraState = viewModel.cameraAccept.collectAsState()
+    val inpTextState = viewModel.textInpAccept.collectAsState()
+    val quizeState = viewModel.quizetextInpAccept.collectAsState()
+
+    var corouselList by remember { mutableStateOf(emptyList<String>()) }
+    if(cameraState.value&&!corouselList.contains("Картинка")) corouselList+="Картинка"
+    if(inpTextState.value&&!corouselList.contains("Текст")) corouselList+="Текст"
+    if(quizeState.value&&!corouselList.contains("Квиз")) corouselList+="Квиз"
+
+
     Box(
         modifier = Modifier.fillMaxWidth(0.5f),
         contentAlignment = Alignment.Center
@@ -42,7 +52,7 @@ fun InputBlockUI(viewModel: InputBlockViewModel){
             verticalArrangement = Arrangement.spacedBy(50.dp)
         ) {
             SwitcherCustom(
-                listOf("Картинка", "Текст", "Квиз"),
+                corouselList,//listOf("Картинка", "Текст", "Квиз"),
                 if (inputState.value==0) "Картинка" else if (inputState.value==1)"Текст" else "Квиз",
                 { it-> viewModel.setInputState(
                     when(it){

@@ -1,6 +1,7 @@
 package ru.kulishov.smartecology.presentation.ui.mainscreen
 
 
+import androidx.lifecycle.ViewModel
 import androidx.room.RoomDatabase
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
@@ -125,11 +126,24 @@ class MainScreenViewModel(
         authAdmin(it)
     }, {
         addUser(it)
+    },{
+        //println(it)
+
+        launch {
+            _settings.value=it
+            setSettingsUseCase(settings.value)
+        }
+
+        _uiState.value= UiState.Success
     })
     var modelAnswer =""
 
 
-
+fun setSetting(set: Setting){
+    launch {
+        setSettingsUseCase(settings.value)
+    }
+}
     val inputBlockViewModel = InputBlockViewModel(
         onTextPrompt = {
             textRequest(it)
@@ -176,7 +190,19 @@ class MainScreenViewModel(
                     quizeGame = settings.value.quizeGame
                 )
                 adminPanelViewModel.setPassword(settings.value.password)
+                adminPanelViewModel.setData(
+                    activities = settings.value.activities,
+                    factAccept = settings.value.factsState,
+                    topAccept = settings.value.topListState,
+                    quizeAccept = settings.value.quizeGameState,
+                    quizeGame = settings.value.quizeGame,
 
+                    cameraAccept = settings.value.imageState,
+                    textInnAccept = settings.value.textState,
+                    quizeStartAccept = settings.value.quizeState,
+                    facts = settings.value.facts,
+                    boxes = settings.value.boxes,
+                )
                 println(settings.value)
             }
 

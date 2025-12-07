@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "settings")
 data class SettingsEntity(
-    @PrimaryKey(autoGenerate = true) val id: Int,
+    @PrimaryKey(autoGenerate = false) val id: Int,
     val password: String,
     val quizeState: Boolean,
     val textState: Boolean,
