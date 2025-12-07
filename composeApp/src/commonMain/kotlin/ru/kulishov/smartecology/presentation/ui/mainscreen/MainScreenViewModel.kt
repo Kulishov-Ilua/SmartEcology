@@ -19,6 +19,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.serialization.json.Json
+import ru.kulishov.smartecology.AI_BOT
+import ru.kulishov.smartecology.AI_MODEL
+import ru.kulishov.smartecology.BASE_URL
 import ru.kulishov.smartecology.data.SystemPrompt
 import ru.kulishov.smartecology.data.local.AppDatabase
 import ru.kulishov.smartecology.data.local.getRoomDatabase
@@ -273,7 +276,7 @@ fun setSetting(set: Setting){
 
                 val jsonBody = """
                 {
-                    "model": "ai/gemma3",
+                    "model": "ai/$AI_MODEL",
                     "messages": [
                         {
                             "role": "system",
@@ -301,7 +304,7 @@ fun setSetting(set: Setting){
                 """.trimIndent()
 
                 val response: HttpResponse =
-                    client.post("http://10.0.2.2:12434/engines/llama.cpp/v1/chat/completions") {
+                    client.post(BASE_URL) {
                         contentType(ContentType.Application.Json)
                         setBody(jsonBody)
                         timeout {
@@ -347,7 +350,7 @@ fun setSetting(set: Setting){
             try {
                 val jsonBody = """
             {
-                "model": "ai/gemma3",
+                "model": "ai/AI_MODEL",
                 "messages": [
                     {
                         "role": "system",
@@ -362,7 +365,7 @@ fun setSetting(set: Setting){
             """.trimIndent()
 
                 val response: HttpResponse =
-                    client.post("http://10.0.2.2:12434/engines/llama.cpp/v1/chat/completions") {
+                    client.post(BASE_URL) {
                         contentType(ContentType.Application.Json)
                         setBody(jsonBody)
                         timeout {
